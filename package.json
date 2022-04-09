@@ -1,18 +1,16 @@
 {
-  "name": "@uniswap/v2-core",
-  "description": "🎛 Core contracts for the UniswapV2 protocol",
+  "name": "@whaleswap/contracts",
+  "description": "🎛 Core contracts for the Whaleswap protocol",
   "version": "1.0.1",
-  "homepage": "https://uniswap.org",
+  "homepage": "https://whale.loans",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Uniswap/uniswap-v2-core"
+    "url": "https://github.com/WhaleLoans/whaleswap-core"
   },
   "keywords": [
-    "uniswap",
+    "whaleswap",
     "ethereum",
-    "v2",
-    "core",
-    "uniswap-v2"
+    "core"
   ],
   "files": [
     "contracts",
@@ -21,18 +19,33 @@
   "engines": {
     "node": ">=10"
   },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.5.0",
+    "@uniswap/lib": "4.0.1-alpha",
+    "ethers": "^5.6.2"
+  },
   "devDependencies": {
+    "@ethersproject/providers": "^5.4.7",
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@typechain/ethers-v5": "^10.0.0",
+    "@typechain/hardhat": "^6.0.0",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
-    "ethereum-waffle": "^2.4.1",
+    "dotenv": "^16.0.0",
+    "ethereum-waffle": "^3.4.0",
     "ethereumjs-util": "^6.2.0",
+    "hardhat": "^2.9.2",
+    "hardhat-abi-exporter": "^2.8.0",
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
     "solc": "0.5.16",
     "ts-node": "^8.5.4",
-    "typescript": "^3.7.3"
+    "typechain": "^8.0.0",
+    "typescript": "^4.5.2"
   },
   "scripts": {
     "lint": "yarn prettier ./test/*.ts --check",
@@ -42,7 +55,8 @@
     "compile": "waffle .waffle.json",
     "pretest": "yarn compile",
     "test": "mocha",
-    "prepublishOnly": "yarn test"
+    "prepublishOnly": "yarn test",
+    "deploy": "npx hardhat run scripts/deploy.ts"
   },
   "license": "GPL-3.0-or-later"
 }

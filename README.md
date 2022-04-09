@@ -1,11 +1,8 @@
-# Uniswap V2
+# Whaleswap
 
-[![Actions Status](https://github.com/Uniswap/uniswap-v2-core/workflows/CI/badge.svg)](https://github.com/Uniswap/uniswap-v2-core/actions)
-[![Version](https://img.shields.io/npm/v/@uniswap/v2-core)](https://www.npmjs.com/package/@uniswap/v2-core)
+[![Actions Status](https://github.com/WhaleLoans/whaleswap-core/workflows/CI/badge.svg)](https://github.com/WhaleLoans/whaleswap-core/actions)
 
-In-depth documentation on Uniswap V2 is available at [uniswap.org](https://uniswap.org/docs).
-
-The built contract artifacts can be browsed via [unpkg.com](https://unpkg.com/browse/@uniswap/v2-core@latest/).
+In-depth documentation on Whaleswap is available at [whale.loans](https://docs.whale.loans/swap).
 
 # Local Development
 
