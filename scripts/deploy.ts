@@ -3,7 +3,8 @@ import {
     WhaleswapFactory__factory,
     WhaleswapInterfaceMulticall__factory,
     WhaleswapRouter__factory,
-    WhaleswapRouter
+    WhaleswapRouter,
+    FlashmintFactory__factory
 } from "../types";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -82,7 +83,28 @@ async function main() {
         const wallet = new ethers.Wallet(privKey, prov);
         const deployerAddress = await wallet.getAddress();
 
-        // Deploy factory
+        // Deploy flash mint factory
+        const mintFactoryFactory = new FlashmintFactory__factory(wallet);
+        let flashmintFactory;
+        if (contracts[network][chainId].factory) {
+            flashmintFactory = mintFactoryFactory.attach(
+                contracts[network][chainId].factory
+            );
+        } else {
+            flashmintFactory = await mintFactoryFactory.deploy(
+                deployerAddress
+            );
+            await flashmintFactory.deployed();
+
+            if(chainId === "56" || chainId === "97"){
+                await VerifyContract(flashmintFactory.address, [
+                    deployerAddress
+                ]);
+            }
+        }
+        console.log(`${chainId}: ✅ Flashmint Factory: ${flashmintFactory.address}`);
+
+        // Deploy swap factory
         const factoryFactory = new WhaleswapFactory__factory(wallet);
         let factory;
         if (contracts[network][chainId].factory) {
@@ -91,17 +113,19 @@ async function main() {
             );
         } else {
             factory = await factoryFactory.deploy(
-                deployerAddress
+                deployerAddress,
+                flashmintFactory.address
             );
             await factory.deployed();
 
             if(chainId === "56" || chainId === "97"){
                 await VerifyContract(factory.address, [
-                    deployerAddress
+                    deployerAddress,
+                    flashmintFactory.address
                 ]);
             }
         }
-        console.log(`${chainId}: ✅ Factory: ${factory.address}`);
+        console.log(`${chainId}: ✅ Swap Factory: ${factory.address}`);
 
         // Deploy router
         let router: WhaleswapRouter;

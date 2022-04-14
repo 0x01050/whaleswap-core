@@ -25,7 +25,7 @@ export const deployFlash = async (signer: SignerWithAddress): Promise<{
     testToken: TestToken
 }> => {
     const testToken = await deployContract("TestToken", [], signer) as TestToken;
-    const flashmintFactory = await deployContract("FlashmintFactory", [deployerAddress], signer) as FlashmintFactory;
+    const flashmintFactory = await deployContract("FlashmintFactory", [signer.address], signer) as FlashmintFactory;
     
     let tx = await flashmintFactory.createFlashMintableToken(testToken.address);
     await tx.wait();
@@ -51,31 +51,9 @@ export const deployFlash = async (signer: SignerWithAddress): Promise<{
     }
 };
 
-export const deploySwapFactory = async (signer: SignerWithAddress): Promise<WhaleswapFactory> =>{
-  return await deployContract("WhaleswapFactory", [deployerAddress], signer) as WhaleswapFactory;
+export const deploySwapFactory = async (signer: SignerWithAddress, flashmintFactoryAddress: string): Promise<WhaleswapFactory> =>{
+  return await deployContract("WhaleswapFactory", [signer.address, flashmintFactoryAddress], signer) as WhaleswapFactory;
 }
-
-export const deployMockSwapPair = async (signer: SignerWithAddress): Promise<{
-  factory: WhaleswapFactory,
-  token0: WhaleswapERC20,
-  token1: WhaleswapERC20,
-  pair: WhaleswapPair
-}> => {
-  const factory = await deploySwapFactory(signer);
-  
-  const tokenA = await deployContract("WhaleswapERC20", [], signer) as WhaleswapERC20;
-  const tokenB = await deployContract("WhaleswapERC20", [], signer) as WhaleswapERC20;
-
-  await factory.createPair(tokenA.address, tokenB.address);
-  const pairAddress = await factory.getPair(tokenA.address, tokenB.address);
-  const pair = await attachToContract("WhaleswapPair", pairAddress, signer) as WhaleswapPair;
-  
-  const token0Address = await pair.token0();
-  const token0 = tokenA.address === token0Address ? tokenA : tokenB;
-  const token1 = tokenA.address === token0Address ? tokenB : tokenA;
-
-  return { factory, token0, token1, pair }
-};
 
 export const deployContract = async (
     contractName: string,

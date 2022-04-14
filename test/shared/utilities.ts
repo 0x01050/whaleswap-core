@@ -36,7 +36,7 @@ export function getCreate2Address(
   [tokenA, tokenB]: [string, string],
   bytecode: string
 ): string {
-  const [token0, token1] = tokenA < tokenB ? [tokenA, tokenB] : [tokenB, tokenA]
+  const [token0, token1] = tokenA.toUpperCase() < tokenB.toUpperCase() ? [tokenA, tokenB] : [tokenB, tokenA]
   const create2Inputs = [
     '0xff',
     factoryAddress,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import './interfaces/IFlashmintFactory.sol';
+import './FlashmintFactory.sol';
 import './WhaleswapPair.sol';
 
 contract WhaleswapFactory {
@@ -11,10 +11,14 @@ contract WhaleswapFactory {
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
 
+    // contracts
+    FlashmintFactory public immutable factory;
+
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
-    constructor(address _feeToSetter) public {
+    constructor(address _feeToSetter, address flashfactory) public {
         feeToSetter = _feeToSetter;
+        factory = FlashmintFactory(flashfactory);
     }
 
     function allPairsLength() external view returns (uint) {
@@ -36,6 +40,14 @@ contract WhaleswapFactory {
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
         emit PairCreated(token0, token1, pair, allPairs.length);
+
+        //Create the flash-mintable tokens if they don't exist
+        if(factory.getToken(tokenA) == address(0)) {
+            factory.createFlashMintableToken(tokenA);
+        }
+        if(factory.getToken(tokenB) == address(0)) {
+            factory.createFlashMintableToken(tokenB);
+        }
     }
 
     function setFeeTo(address _feeTo) external {

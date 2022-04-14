@@ -2,7 +2,7 @@ import chai from "chai";
 import { ethers } from "hardhat";
 import { solidity } from "ethereum-waffle";
 import { expect } from "chai";
-import { deployFlash } from "../scripts/deployer";
+import { deployContract, deployFlash } from "../scripts/deployer";
 import { 
   BorrowerFERC20, BorrowerFERC20__factory, BorrowerFWeth, BorrowerFWeth__factory,
   FlashERC20, FlashERC20__factory, FlashMain, FlashMain__factory, TestToken, 
@@ -41,7 +41,7 @@ describe("FlashMintableTokens", async function () {
 
   beforeEach(async function () {
     [testAc, testAc2, testAc3] = await ethers.getSigners();
-    deployedContractsOwner = await deployFlash(testAc3);
+    deployedContractsOwner = await deployFlash(testAc);
     deployedContracts = getSignedContracts(testAc, deployedContractsOwner);
     deployedContractsU2 = getSignedContracts(testAc2, deployedContractsOwner);
   });
@@ -159,7 +159,7 @@ describe("FlashMintableTokens", async function () {
     expect(ethers.utils.formatEther(otherAccountBalance)).equal(ethers.utils.formatEther(transferAmount));
   });
 
-  it("FlashMain functions should work together", async function () {
+  /*it("FlashMain functions should work together", async function () {
     const {
       flashmintFactory,
       flashTokenMain,
@@ -254,5 +254,5 @@ describe("FlashMintableTokens", async function () {
     // We should now have {depositAmount} less than before the deposit
     expect(ethers.utils.formatEther(newBalance)).equal(ethers.utils.formatEther(postDepositBalance.sub(transferAmount)));
     expect(ethers.utils.formatEther(otherAccountBalance)).equal(ethers.utils.formatEther(transferAmount));
-  });
+  });*/
 });
