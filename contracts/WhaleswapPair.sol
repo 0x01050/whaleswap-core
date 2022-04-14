@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.5.16;
+pragma solidity ^0.7.0;
 
-import './interfaces/IWhaleswapPair.sol';
 import './WhaleswapERC20.sol';
 import './libraries/Math.sol';
 import './libraries/UQ112x112.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IWhaleswapFactory.sol';
+import './interfaces/IFlashmintFactory.sol';
 import './interfaces/IWhaleswapCallee.sol';
 
-contract WhaleswapPair is IWhaleswapPair, WhaleswapERC20 {
+contract WhaleswapPair is WhaleswapERC20 {
     using SafeMath  for uint;
     using UQ112x112 for uint224;
 

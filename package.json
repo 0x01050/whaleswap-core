@@ -50,11 +50,8 @@
   "scripts": {
     "lint": "yarn prettier ./test/*.ts --check",
     "lint:fix": "yarn prettier ./test/*.ts --write",
-    "clean": "rimraf ./build/",
-    "precompile": "yarn clean",
-    "compile": "waffle .waffle.json",
-    "pretest": "yarn compile",
-    "test": "mocha",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
     "prepublishOnly": "yarn test",
     "deploy": "npx hardhat run scripts/deploy.ts"
   },

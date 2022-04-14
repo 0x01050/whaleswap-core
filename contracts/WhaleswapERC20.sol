@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.5.16;
+pragma solidity ^0.7.0;
 
-import './interfaces/IWhaleswapERC20.sol';
 import './libraries/SafeMath.sol';
 
-contract WhaleswapERC20 is IWhaleswapERC20 {
+contract WhaleswapERC20 {
     using SafeMath for uint;
 
     string public constant name = 'Whaleswap';
@@ -25,7 +24,7 @@ contract WhaleswapERC20 is IWhaleswapERC20 {
     constructor() public {
         uint chainId;
         assembly {
-            chainId := chainid
+            chainId := chainid()
         }
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(

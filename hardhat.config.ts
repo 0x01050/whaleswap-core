@@ -18,7 +18,10 @@ module.exports = {
         //url: "https://speedy-nodes-nyc.moralis.io/214f6439e2aaf21012c17787/bsc/mainnet/archive",
         url: "https://speedy-nodes-nyc.moralis.io/214f6439e2aaf21012c17787/bsc/testnet/archive",
       },
-      accounts: [{ privateKey: process.env['Testnet_Deployer_PrivateKey'], balance: '1000000000000000000' }]
+      accounts: [
+        { privateKey: process.env['Testnet_Deployer_PrivateKey'], balance: '1000000000000000000' },
+        { privateKey: process.env['Mainnet_Deployer_PrivateKey'], balance: '1000000000000000000' }
+      ]
     },
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -54,6 +57,14 @@ module.exports = {
       },
       {
         version: "0.6.6",
+        settings: {
+          optimizer: {
+            enabled: true
+          }
+        }
+      },
+      {
+        version: "0.7.0",
         settings: {
           optimizer: {
             enabled: true

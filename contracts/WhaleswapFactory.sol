@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity =0.5.16;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.7.0;
 
-import './interfaces/IWhaleswapFactory.sol';
+import './interfaces/IFlashmintFactory.sol';
 import './WhaleswapPair.sol';
 
-contract WhaleswapFactory is IWhaleswapFactory {
+contract WhaleswapFactory {
     address public feeTo;
     address public feeToSetter;
 
@@ -31,7 +31,7 @@ contract WhaleswapFactory is IWhaleswapFactory {
         assembly {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        IWhaleswapPair(pair).initialize(token0, token1);
+        WhaleswapPair(pair).initialize(token0, token1);
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
