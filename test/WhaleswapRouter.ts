@@ -102,6 +102,8 @@ describe('WhaleswapRouter', async () => {
   })
 
   it('doSwapWithFlashMint', async () => {
+    const amountIn = ethers.utils.parseEther("1");
+
     let tx = await router.addLiquidity(
         token0.address,
         token1.address,
@@ -113,14 +115,20 @@ describe('WhaleswapRouter', async () => {
         maxUint256
     );
     await tx.wait();
+
+    // Get the FMT contract and deposit a few
     const fmt = await attachToContract("FlashERC20", await flashmintFactory.getFmToken(token0.address), wallet) as FlashERC20;
+    tx = await token0.approve(fmt.address, amountIn);
+    tx = await fmt.approve(router.address, amountIn);
+    tx = await fmt.deposit(amountIn);
+    await tx.wait();
 
     const initialBalance0 = await token0.balanceOf(wallet.address);
     const initialBalance1 = await token1.balanceOf(wallet.address);
+    const initialFmtBalance = await fmt.balanceOf(wallet.address);
     const initialLpBalance0 = await token0.balanceOf(pair.address);
     const initialLpBalance1 = await token1.balanceOf(pair.address);
 
-    const amountIn = ethers.utils.parseEther("1");
     tx = await router.swapExactTokensForTokens(
         amountIn,
         0,
@@ -132,12 +140,14 @@ describe('WhaleswapRouter', async () => {
 
     const finalBalance0 = await token0.balanceOf(wallet.address);
     const finalBalance1 = await token1.balanceOf(wallet.address);
+    const finalFmtBalance = await fmt.balanceOf(wallet.address);
     const finalLpBalance0 = await token0.balanceOf(pair.address);
     const finalLpBalance1 = await token1.balanceOf(pair.address);
     const lpFmtBalance = await fmt.balanceOf(pair.address);
 
-    // Should have {amountIn} less than we started with
-    expect(finalBalance0).equals(initialBalance0.sub(amountIn));
+    // Should have same amount of the base token and {amountIn} less of the FMT than we started with
+    expect(finalBalance0).equals(initialBalance0);
+    expect(finalFmtBalance).equals(initialFmtBalance.sub(amountIn));
 
     // Should have slightly more than before
     expect(Number(ethers.utils.formatEther(finalBalance1))).gt(Number(ethers.utils.formatEther(initialBalance1)));

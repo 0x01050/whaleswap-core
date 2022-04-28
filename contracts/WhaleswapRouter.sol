@@ -231,16 +231,32 @@ contract WhaleswapRouter is IWhaleswapRouter {
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        /*address baseAddress = flashFactory.getBaseToken(path[0]);
-        if(baseAddress != address(0)){
-            path[0] = baseAddress;
-        }*/
-        amounts = WhaleswapLibrary.getAmountsOut(factory, amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'WhaleswapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
-            path[0], msg.sender, WhaleswapLibrary.pairFor(factory, path[0], path[1]), amounts[0]
-        );
-        _swap(amounts, path, to);
+        // Swap from FMT after calculating amounts
+        address baseAddress = flashFactory.getBaseToken(path[0]);
+        if(baseAddress != address(0)) {
+            // Reconstruct path with the base token instead of the FM token
+            address[] memory fmPaths = new address[](path.length);
+            fmPaths[0] = baseAddress;
+            for(uint i = 1; i < path.length; i++) {
+                fmPaths[i] = path[i];
+            }
+            amounts = WhaleswapLibrary.getAmountsOut(factory, amountIn, fmPaths);
+
+            require(amounts[amounts.length - 1] >= amountOutMin, 'WhaleswapRouter: INSUFFICIENT_OUTPUT_AMOUNT');        
+            TransferHelper.safeTransferFrom(
+                path[0], msg.sender, WhaleswapLibrary.pairFor(factory, path[0], path[1]), amounts[0]
+            );
+            _swap(amounts, fmPaths, to);
+        }
+        else {
+            amounts = WhaleswapLibrary.getAmountsOut(factory, amountIn, path);
+
+            require(amounts[amounts.length - 1] >= amountOutMin, 'WhaleswapRouter: INSUFFICIENT_OUTPUT_AMOUNT');        
+            TransferHelper.safeTransferFrom(
+                path[0], msg.sender, WhaleswapLibrary.pairFor(factory, path[0], path[1]), amounts[0]
+            );
+            _swap(amounts, path, to);
+        }
     }
     function swapTokensForExactTokens(
         uint amountOut,
