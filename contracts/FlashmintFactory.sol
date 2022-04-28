@@ -21,11 +21,16 @@ contract FlashmintFactory {
 
     function createFlashMintableToken(address baseToken) external returns (address fmToken) {
         require(getFmToken[baseToken] == address(0), 'Flashmint: TOKEN_EXISTS'); // No need to check other way around
+        require(getBaseToken[baseToken] == address(0), 'Flashmint: TOKEN_EXISTS'); // Can't create an fmt of another fmt
+
+        // Create the token
         bytes memory bytecode = getCreationBytecode(baseToken);
         bytes32 salt = keccak256(abi.encodePacked(baseToken));
         assembly {
             fmToken := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
+
+        // Store the token details
         getBaseToken[fmToken] = baseToken;
         getFmToken[baseToken] = fmToken;
         allTokens.push(fmToken);

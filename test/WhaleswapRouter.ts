@@ -117,6 +117,9 @@ describe('WhaleswapRouter', async () => {
 
     const initialBalance0 = await token0.balanceOf(wallet.address);
     const initialBalance1 = await token1.balanceOf(wallet.address);
+    const initialLpBalance0 = await token0.balanceOf(pair.address);
+    const initialLpBalance1 = await token1.balanceOf(pair.address);
+
     const amountIn = ethers.utils.parseEther("1");
     tx = await router.swapExactTokensForTokens(
         amountIn,
@@ -126,14 +129,23 @@ describe('WhaleswapRouter', async () => {
         maxUint256
     );
     await tx.wait();
+
     const finalBalance0 = await token0.balanceOf(wallet.address);
     const finalBalance1 = await token1.balanceOf(wallet.address);
+    const finalLpBalance0 = await token0.balanceOf(pair.address);
+    const finalLpBalance1 = await token1.balanceOf(pair.address);
+    const lpFmtBalance = await fmt.balanceOf(pair.address);
 
     // Should have {amountIn} less than we started with
     expect(finalBalance0).equals(initialBalance0.sub(amountIn));
 
     // Should have slightly more than before
     expect(Number(ethers.utils.formatEther(finalBalance1))).gt(Number(ethers.utils.formatEther(initialBalance1)));
+
+    // LP should be greater than and less than the initial balances, holding no fmts
+    expect(finalLpBalance0).gt(initialLpBalance0);
+    expect(finalLpBalance1).lt(initialLpBalance1);
+    expect(lpFmtBalance).equals(0);
   })
 
   it('quote', async () => {
