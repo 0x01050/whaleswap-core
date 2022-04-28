@@ -23,7 +23,10 @@ describe("FlashmintFactory", async function () {
       let tx = await factory.createFlashMintableToken(testToken.address);
       await tx.wait();
 
-      const address = await factory.getToken(testToken.address);
-      expect(address).not.equal("0x0000000000000000000000000000000000000000");
+      const fmAddress = await factory.getFmToken(testToken.address);
+      expect(fmAddress).not.equal("0x0000000000000000000000000000000000000000");
+
+      const baseAddress = await factory.getBaseToken(fmAddress);
+      expect(baseAddress).equal(testToken.address);
     });
 });

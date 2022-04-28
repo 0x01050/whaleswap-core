@@ -10,7 +10,7 @@
 //
 //  https://Whale.Loans
 //
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.13;
 
 import "./libraries/ERC20.sol";
 import "./libraries/SafeERC20.sol";
@@ -85,7 +85,6 @@ contract FlashERC20 is ERC20, Ownable, ReentrancyGuard {
         require(amount < (type(uint256).max - totalSupply()));
 
         // calculate fee
-        address feeTo = FlashmintFactory(factory).feeTo();
         uint256 fee = FlashmintFactory(factory).fee();
         uint256 actualFee = amount.mul(fee).div(oneEth);
 

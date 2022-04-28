@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity =0.6.6;
+pragma solidity ^0.8.13;
 
 // helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
 library TransferHelper {
@@ -29,6 +29,7 @@ library TransferHelper {
         );
     }
 
+
     function safeTransferFrom(
         address token,
         address from,
@@ -41,6 +42,18 @@ library TransferHelper {
             success && (data.length == 0 || abi.decode(data, (bool))),
             'TransferHelper::transferFrom: transferFrom failed'
         );
+    }
+
+    function bytes4ToString(bytes4 _bytes4) public pure returns (string memory) {
+        uint8 i = 0;
+        while(i < 4 && _bytes4[i] != 0) {
+            i++;
+        }
+        bytes memory bytesArray = new bytes(i);
+        for (i = 0; i < 4 && _bytes4[i] != 0; i++) {
+            bytesArray[i] = _bytes4[i];
+        }
+        return string(bytesArray);
     }
 
     function safeTransferETH(address to, uint256 value) internal {

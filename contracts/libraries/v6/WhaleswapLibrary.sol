@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.5.0;
+pragma solidity ^0.8.13;
 
 import '../../interfaces/IWhaleswapPair.sol';
 import "./SafeMath.sol";
@@ -17,12 +17,12 @@ library WhaleswapLibrary {
     // calculates the CREATE2 address for a pair without making any external calls
     function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {
         (address token0, address token1) = sortTokens(tokenA, tokenB);
-        pair = address(uint(keccak256(abi.encodePacked(
+        pair = address(uint160(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'31f48aaa302796c07c32f9957e6aef4162c7bfd4cc3ad4e5a86324d174a03525' // init code hash
-            ))));
+                hex'b124df462c33fffbfacc69a702f0f78ef81d23f3e907c087bebe7d016643943a' // init code hash
+            )))));
     }
 
     // fetches and sorts the reserves for a pair

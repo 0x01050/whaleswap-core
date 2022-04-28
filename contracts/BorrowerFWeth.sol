@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.4;
+pragma solidity ^0.8.13;
 
 import "./libraries/Ownable.sol";
 import "./interfaces/IFlashWETH.sol";
@@ -20,7 +20,7 @@ contract BorrowerFWeth is Ownable {
     receive() external payable {}
 
     function retrieve(uint256 amount) external onlyOwner {
-        msg.sender.transfer(amount);
+        payable(msg.sender).transfer(amount);
     }
 
     // call this function to fire off your flash mint

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity =0.6.6;
+pragma solidity ^0.8.13;
 
 import './libraries/v6/SafeMath.sol';
 import './libraries/v6/TransferHelper.sol';
@@ -8,20 +8,23 @@ import './interfaces/IERC20.sol';
 import './interfaces/IWETH.sol';
 import './interfaces/IWhaleswapFactory.sol';
 import './interfaces/v6/IWhaleswapRouter.sol';
+import './interfaces/IFlashmintFactory.sol';
 
 contract WhaleswapRouter is IWhaleswapRouter {
     using SafeMath for uint;
 
     address public immutable override factory;
     address public immutable override WETH;
+    IFlashmintFactory public immutable flashFactory;
 
     modifier ensure(uint deadline) {
         require(deadline >= block.timestamp, 'Whaleswap: EXPIRED');
         _;
     }
 
-    constructor(address _factory, address _WETH) public {
+    constructor(address _factory, address _WETH) {
         factory = _factory;
+        flashFactory = IFlashmintFactory(IWhaleswapFactory(factory).factory());
         WETH = _WETH;
     }
 
@@ -149,7 +152,7 @@ contract WhaleswapRouter is IWhaleswapRouter {
         bool approveMax, uint8 v, bytes32 r, bytes32 s
     ) external virtual override returns (uint amountA, uint amountB) {
         address pair = WhaleswapLibrary.pairFor(factory, tokenA, tokenB);
-        uint value = approveMax ? uint(-1) : liquidity;
+        uint value = approveMax ? type(uint).max : liquidity;
         IWhaleswapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
     }
@@ -163,7 +166,7 @@ contract WhaleswapRouter is IWhaleswapRouter {
         bool approveMax, uint8 v, bytes32 r, bytes32 s
     ) external virtual override returns (uint amountToken, uint amountETH) {
         address pair = WhaleswapLibrary.pairFor(factory, token, WETH);
-        uint value = approveMax ? uint(-1) : liquidity;
+        uint value = approveMax ? type(uint).max : liquidity;
         IWhaleswapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountToken, amountETH) = removeLiquidityETH(token, liquidity, amountTokenMin, amountETHMin, to, deadline);
     }
@@ -200,7 +203,7 @@ contract WhaleswapRouter is IWhaleswapRouter {
         bool approveMax, uint8 v, bytes32 r, bytes32 s
     ) external virtual override returns (uint amountETH) {
         address pair = WhaleswapLibrary.pairFor(factory, token, WETH);
-        uint value = approveMax ? uint(-1) : liquidity;
+        uint value = approveMax ? type(uint).max : liquidity;
         IWhaleswapPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         amountETH = removeLiquidityETHSupportingFeeOnTransferTokens(
             token, liquidity, amountTokenMin, amountETHMin, to, deadline
@@ -224,10 +227,14 @@ contract WhaleswapRouter is IWhaleswapRouter {
     function swapExactTokensForTokens(
         uint amountIn,
         uint amountOutMin,
-        address[] calldata path,
+        address[] memory path,
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
+        address baseAddress = flashFactory.getBaseToken(path[0]);
+        if(baseAddress != address(0)){
+            path[0] = baseAddress;
+        }
         amounts = WhaleswapLibrary.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'WhaleswapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
@@ -238,10 +245,14 @@ contract WhaleswapRouter is IWhaleswapRouter {
     function swapTokensForExactTokens(
         uint amountOut,
         uint amountInMax,
-        address[] calldata path,
+        address[] memory path,
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
+        address baseAddress = flashFactory.getBaseToken(path[0]);
+        if(baseAddress != address(0)){
+            path[0] = baseAddress;
+        }
         amounts = WhaleswapLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'WhaleswapRouter: EXCESSIVE_INPUT_AMOUNT');
         TransferHelper.safeTransferFrom(

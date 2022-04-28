@@ -70,20 +70,20 @@ describe('WhaleswapFactory', async () => {
 
   it('createPairWithFlashmintableTokens', async () => {
     await createPair([testToken.address, testToken2.address])
-    let tokenAFmt = await flashmintFactory.getToken(testToken.address)
+    let tokenAFmt = await flashmintFactory.getFmToken(testToken.address)
     expect(tokenAFmt).to.not.eq(AddressZero)
-    let tokenBFmt = await flashmintFactory.getToken(testToken2.address)
+    let tokenBFmt = await flashmintFactory.getFmToken(testToken2.address)
     expect(tokenBFmt).to.not.eq(AddressZero)
 
     // Create a pair with an overlapping token
     await createPair([testToken.address, testToken3.address], 2)
 
     // Ensure it won't get weird if we double deploy
-    let tokenAFmt2 = await flashmintFactory.getToken(testToken.address)
+    let tokenAFmt2 = await flashmintFactory.getFmToken(testToken.address)
     expect(tokenAFmt).equal(tokenAFmt2)
-    let tokenBFmt2 = await flashmintFactory.getToken(testToken2.address)
+    let tokenBFmt2 = await flashmintFactory.getFmToken(testToken2.address)
     expect(tokenBFmt).equal(tokenBFmt2)
-    let tokenCFmt = await flashmintFactory.getToken(testToken3.address)
+    let tokenCFmt = await flashmintFactory.getFmToken(testToken3.address)
     expect(tokenCFmt).to.not.eq(AddressZero)
   })
 

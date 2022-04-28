@@ -29,12 +29,12 @@ export const deployFlash = async (signer: SignerWithAddress): Promise<{
     
     let tx = await flashmintFactory.createFlashMintableToken(testToken.address);
     await tx.wait();
-    const flashTokenERC20Address = await flashmintFactory.getToken(testToken.address);
+    const flashTokenERC20Address = await flashmintFactory.getFmToken(testToken.address);
     const flashTokenERC20 = await attachToContract("FlashERC20", flashTokenERC20Address, signer) as FlashERC20;
     
     tx = await flashmintFactory.createFlashMintableToken(ZERO_ADDRESS);
     await tx.wait();
-    const flashTokenMainAddress = await flashmintFactory.getToken(ZERO_ADDRESS);
+    const flashTokenMainAddress = await flashmintFactory.getFmToken(ZERO_ADDRESS);
     const flashTokenMain = await attachToContract("FlashMain", flashTokenMainAddress, signer) as FlashMain;
 
     const helper = await deployContract("Helper", [], signer);

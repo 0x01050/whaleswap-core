@@ -1,4 +1,5 @@
-pragma solidity ^0.7.0;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
 
 /**
  * @dev Interface of FlashWETH ERC20 token. Does not include

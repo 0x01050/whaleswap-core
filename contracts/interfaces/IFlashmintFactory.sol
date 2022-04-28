@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.5.0;
+pragma solidity ^0.8.13;
 
 interface IFlashmintFactory {
     event TokenCreated(address indexed baseToken, address fmToken, uint);
@@ -8,7 +8,8 @@ interface IFlashmintFactory {
     function feeTo() external view returns (address);
     function feeToSetter() external view returns (address);
 
-    function getToken(address baseToken) external view returns (address fmToken);
+    function getBaseToken(address fmToken) external view returns (address baseToken);
+    function getFmToken(address baseToken) external view returns (address fmToken);
     function allTokens(uint) external view returns (address token);
     function allTokensLength() external view returns (uint);
 

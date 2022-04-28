@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.13;
 
 import './FlashmintFactory.sol';
 import './WhaleswapPair.sol';
@@ -16,7 +16,7 @@ contract WhaleswapFactory {
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
-    constructor(address _feeToSetter, address flashfactory) public {
+    constructor(address _feeToSetter, address flashfactory) {
         feeToSetter = _feeToSetter;
         factory = FlashmintFactory(flashfactory);
     }
@@ -42,10 +42,10 @@ contract WhaleswapFactory {
         emit PairCreated(token0, token1, pair, allPairs.length);
 
         //Create the flash-mintable tokens if they don't exist
-        if(factory.getToken(tokenA) == address(0)) {
+        if(factory.getFmToken(tokenA) == address(0)) {
             factory.createFlashMintableToken(tokenA);
         }
-        if(factory.getToken(tokenB) == address(0)) {
+        if(factory.getFmToken(tokenB) == address(0)) {
             factory.createFlashMintableToken(tokenB);
         }
     }

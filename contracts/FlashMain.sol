@@ -10,7 +10,7 @@
 //
 //  https://Whale.Loans
 //
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.13;
 
 import "./libraries/ERC20.sol";
 import "./libraries/SafeMath.sol";
@@ -76,7 +76,7 @@ contract FlashMain is ERC20, Ownable, ReentrancyGuard {
     // Redeems fWBNB 1-to-1 for BNB.
     function withdraw(uint256 wad) public {
         _burn(msg.sender, wad); // reverts if `msg.sender` does not have enough fWBNB
-        msg.sender.transfer(wad);
+        payable(msg.sender).transfer(wad);
         emit Withdrawal(msg.sender, wad);
     }
 
@@ -86,7 +86,6 @@ contract FlashMain is ERC20, Ownable, ReentrancyGuard {
         require(amount < (type(uint256).max - totalSupply()));
 
         // calculate fee
-        address feeTo = FlashmintFactory(factory).feeTo();
         uint256 fee = FlashmintFactory(factory).fee();
         _borrowerDebt = amount.mul(fee).div(oneEth);
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.13;
 
 import './FlashERC20.sol';
 import './FlashMain.sol';
@@ -9,7 +9,8 @@ contract FlashmintFactory {
     address public feeSetter;
     uint256 public fee = 0.001e18; // 0.1% fee
 
-    mapping(address => address) public getToken;
+    mapping(address => address) public getFmToken; // Holds base -> flash-mintable token mappings
+    mapping(address => address) public getBaseToken; // Holds flash-mintable -> base token mappings
     address[] public allTokens;
 
     event TokenCreated(address indexed baseToken, address fmToken, uint);
@@ -19,13 +20,14 @@ contract FlashmintFactory {
     }
 
     function createFlashMintableToken(address baseToken) external returns (address fmToken) {
-        require(getToken[baseToken] == address(0), 'Flashmint: TOKEN_EXISTS');
+        require(getFmToken[baseToken] == address(0), 'Flashmint: TOKEN_EXISTS'); // No need to check other way around
         bytes memory bytecode = getCreationBytecode(baseToken);
         bytes32 salt = keccak256(abi.encodePacked(baseToken));
         assembly {
             fmToken := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
-        getToken[baseToken] = fmToken;
+        getBaseToken[fmToken] = baseToken;
+        getFmToken[baseToken] = fmToken;
         allTokens.push(fmToken);
         emit TokenCreated(baseToken, fmToken, allTokens.length);
     }

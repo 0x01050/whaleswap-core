@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.13;
 
 /**
  * @dev Collection of functions related to the address type
@@ -40,7 +40,7 @@ library Address {
      * _Available since v2.4.0._
      */
     function toPayable(address account) internal pure returns (address payable) {
-        return address(uint160(account));
+        return payable(address(uint160(account)));
     }
 
     /**
