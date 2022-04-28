@@ -227,14 +227,14 @@ contract WhaleswapRouter is IWhaleswapRouter {
     function swapExactTokensForTokens(
         uint amountIn,
         uint amountOutMin,
-        address[] memory path,
+        address[] calldata path,
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        address baseAddress = flashFactory.getBaseToken(path[0]);
+        /*address baseAddress = flashFactory.getBaseToken(path[0]);
         if(baseAddress != address(0)){
             path[0] = baseAddress;
-        }
+        }*/
         amounts = WhaleswapLibrary.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'WhaleswapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
