@@ -5,8 +5,7 @@ import './WhaleswapERC20.sol';
 import './libraries/Math.sol';
 import './libraries/UQ112x112.sol';
 import './interfaces/IERC20.sol';
-import './interfaces/IWhaleswapFactory.sol';
-import './interfaces/IFlashmintFactory.sol';
+import './WhaleswapFactory.sol';
 import './interfaces/IWhaleswapCallee.sol';
 
 contract WhaleswapPair is WhaleswapERC20 {
@@ -16,12 +15,17 @@ contract WhaleswapPair is WhaleswapERC20 {
     uint public constant MINIMUM_LIQUIDITY = 10**3;
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
+    // Used to denote stable or volatile pair, not immutable since construction happens in the initialize method for CREATE2 deterministic addresses
+    bool public immutable stable;
+
     address public factory;
     address public token0;
     address public token1;
 
     uint112 private reserve0;           // uses single storage slot, accessible via getReserves
     uint112 private reserve1;           // uses single storage slot, accessible via getReserves
+    uint private decimals0;
+    uint private decimals1;
     uint32  private blockTimestampLast; // uses single storage slot, accessible via getReserves
 
     uint public price0CumulativeLast;
@@ -61,13 +65,64 @@ contract WhaleswapPair is WhaleswapERC20 {
 
     constructor() {
         factory = msg.sender;
+
+        (address _token0, address _token1, bool _stable) = WhaleswapFactory(msg.sender).getInitializable();
+        (token0, token1, stable) = (_token0, _token1, _stable);
+
+        if (_stable) {
+            name = string(abi.encodePacked("Stable AMM - ", IERC20(_token0).symbol(), "/", IERC20(_token1).symbol()));
+            symbol = string(abi.encodePacked("sAMM-", IERC20(_token0).symbol(), "/", IERC20(_token1).symbol()));
+        } else {
+            name = string(abi.encodePacked("Volatile AMM - ", IERC20(_token0).symbol(), "/", IERC20(_token1).symbol()));
+            symbol = string(abi.encodePacked("vAMM-", IERC20(_token0).symbol(), "/", IERC20(_token1).symbol()));
+        }
+
+        decimals0 = 10**IERC20(_token0).decimals();
+        decimals1 = 10**IERC20(_token1).decimals();
     }
 
-    // called once by the factory at time of deployment
-    function initialize(address _token0, address _token1) external {
-        require(msg.sender == factory, 'Whaleswap: FORBIDDEN'); // sufficient check
-        token0 = _token0;
-        token1 = _token1;
+    function _k(uint x, uint y) internal view returns (uint) {
+        if (stable) {
+            uint _x = x * 1e18 / decimals0;
+            uint _y = y * 1e18 / decimals1;
+            uint _a = (_x * _y) / 1e18;
+            uint _b = ((_x * _x) / 1e18 + (_y * _y) / 1e18);
+            return _a * _b / 1e18;  // x3y + y3x >= k
+        } else {
+            return x * y; // xy >= k
+        }
+    }
+
+    function _f(uint x0, uint y) internal pure returns (uint) {
+        return x0*(y*y/1e18*y/1e18)/1e18+(x0*x0/1e18*x0/1e18)*y/1e18;
+    }
+
+    function _d(uint x0, uint y) internal pure returns (uint) {
+        return 3*x0*(y*y/1e18)/1e18+(x0*x0/1e18*x0/1e18);
+    }
+
+    function _get_y(uint x0, uint xy, uint y) internal pure returns (uint) {
+        for (uint i = 0; i < 255; i++) {
+            uint y_prev = y;
+            uint k = _f(x0, y);
+            if (k < xy) {
+                uint dy = (xy - k)*1e18/_d(x0, y);
+                y = y + dy;
+            } else {
+                uint dy = (k - xy)*1e18/_d(x0, y);
+                y = y - dy;
+            }
+            if (y > y_prev) {
+                if (y - y_prev <= 1) {
+                    return y;
+                }
+            } else {
+                if (y_prev - y <= 1) {
+                    return y;
+                }
+            }
+        }
+        return y;
     }
 
     // update reserves and, on the first call per block, price accumulators
@@ -86,9 +141,9 @@ contract WhaleswapPair is WhaleswapERC20 {
         emit Sync(reserve0, reserve1);
     }
 
-    // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
+    // if fee is on, mint liquidity equivalent to 5/25th (or 1/4th) of the growth in sqrt(k)
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private returns (bool feeOn) {
-        address feeTo = IWhaleswapFactory(factory).feeTo();
+        address feeTo = WhaleswapFactory(factory).feeTo();
         feeOn = feeTo != address(0);
         uint _kLast = kLast; // gas savings
         if (feeOn) {
@@ -97,7 +152,17 @@ contract WhaleswapPair is WhaleswapERC20 {
                 uint rootKLast = Math.sqrt(_kLast);
                 if (rootK > rootKLast) {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
-                    uint denominator = rootK.mul(5).add(rootKLast);
+                    uint denominator = rootK.mul(20).add(rootKLast.mul(5));
+
+                    // Dynamic fees for stable pairs
+                    if(stable) {
+                        numerator = numerator.mul(1);
+                        denominator = rootK.mul(4).add(rootKLast.mul(1));
+                    }
+                    else {
+                        numerator = numerator.mul(5);
+                        denominator = rootK.mul(20).add(rootKLast.mul(5));
+                    }
                     uint liquidity = numerator / denominator;
                     if (liquidity > 0) _mint(feeTo, liquidity);
                 }
@@ -156,6 +221,37 @@ contract WhaleswapPair is WhaleswapERC20 {
         emit Burn(msg.sender, amount0, amount1, to);
     }
 
+    // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
+    function getAmountOut(uint amountIn, address tokenIn) external view returns (uint) {
+        require(amountIn > 0, 'WhaleswapLibrary: INSUFFICIENT_INPUT_AMOUNT');
+        require(tokenIn == token0 || tokenIn == token1);
+        (uint112 _reserve0, uint112 _reserve1) = (reserve0, reserve1);
+
+        // Remove fee from amount received
+        if(stable) {
+            amountIn -= amountIn / 40000;
+        }
+        else {
+            amountIn -= amountIn / 250000; //TODO: Check this is the right number of decimals
+        }
+        return _getAmountOut(amountIn, tokenIn, _reserve0, _reserve1);
+    }
+
+    function _getAmountOut(uint amountIn, address tokenIn, uint _reserve0, uint _reserve1) internal view returns (uint) {
+        if (stable) {
+            uint xy =  _k(_reserve0, _reserve1);
+            _reserve0 = _reserve0 * 1e18 / decimals0;
+            _reserve1 = _reserve1 * 1e18 / decimals1;
+            (uint reserveA, uint reserveB) = tokenIn == token0 ? (_reserve0, _reserve1) : (_reserve1, _reserve0);
+            amountIn = tokenIn == token0 ? amountIn * 1e18 / decimals0 : amountIn * 1e18 / decimals1;
+            uint y = reserveB - _get_y(amountIn+reserveA, xy, reserveB);
+            return y * (tokenIn == token0 ? decimals1 : decimals0) / 1e18;
+        } else {
+            (uint reserveA, uint reserveB) = tokenIn == token0 ? (_reserve0, _reserve1) : (_reserve1, _reserve0);
+            return amountIn * reserveB / (reserveA + amountIn);
+        }
+    }
+
     // this low-level function should be called from a contract which performs important safety checks
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external lock {
         require(amount0Out > 0 || amount1Out > 0, 'Whaleswap: INSUFFICIENT_OUTPUT_AMOUNT');
@@ -165,22 +261,34 @@ contract WhaleswapPair is WhaleswapERC20 {
         uint balance0;
         uint balance1;
         { // scope for _token{0,1}, avoids stack too deep errors
-        address _token0 = token0;
-        address _token1 = token1;
-        require(to != _token0 && to != _token1, 'Whaleswap: INVALID_TO');
-        if (amount0Out > 0) _safeTransfer(_token0, to, amount0Out); // optimistically transfer tokens
-        if (amount1Out > 0) _safeTransfer(_token1, to, amount1Out); // optimistically transfer tokens
-        if (data.length > 0) IWhaleswapCallee(to).whaleswapCall(msg.sender, amount0Out, amount1Out, data);
-        balance0 = IERC20(_token0).balanceOf(address(this));
-        balance1 = IERC20(_token1).balanceOf(address(this));
+            (address _token0, address _token1) = (token0, token1);
+            require(to != _token0 && to != _token1, 'Whaleswap: INVALID_TO');
+            if (amount0Out > 0) _safeTransfer(_token0, to, amount0Out); // optimistically transfer tokens
+            if (amount1Out > 0) _safeTransfer(_token1, to, amount1Out); // optimistically transfer tokens
+            if (data.length > 0) IWhaleswapCallee(to).whaleswapCall(msg.sender, amount0Out, amount1Out, data);
+            balance0 = IERC20(_token0).balanceOf(address(this));
+            balance1 = IERC20(_token1).balanceOf(address(this));
         }
         uint amount0In = balance0 > _reserve0 - amount0Out ? balance0 - (_reserve0 - amount0Out) : 0;
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'Whaleswap: INSUFFICIENT_INPUT_AMOUNT');
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
-        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
-        require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'Whaleswap: K');
+            uint balance0Adjusted = balance0.mul(10000);
+            uint balance1Adjusted = balance1.mul(10000); 
+
+            // Dynamic fees 🐳
+            if(stable){
+                balance0Adjusted = balance0Adjusted.sub(amount0In.mul(25)); // 25 == 0.25% fee
+                balance1Adjusted = balance1Adjusted.sub(amount1In.mul(25));
+            }
+            else{
+                balance0Adjusted = balance0Adjusted.sub(amount0In.mul(4)); // 4 == 0.04% fee
+                balance1Adjusted = balance1Adjusted.sub(amount1In.mul(4));
+            }
+            require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(10000**2), 'Whaleswap: K');
+
+            // The curve, either x3y+y3x for stable pools, or x*y for volatile pools
+            require(_k(balance0Adjusted, balance1Adjusted) >= _k(_reserve0, _reserve1).mul(10000**2), 'Whaleswap: K');
         }
 
         _update(balance0, balance1, _reserve0, _reserve1);

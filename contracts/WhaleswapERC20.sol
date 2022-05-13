@@ -6,10 +6,10 @@ import './libraries/SafeMath.sol';
 contract WhaleswapERC20 {
     using SafeMath for uint;
 
-    string public constant name = 'Whaleswap';
-    string public constant symbol = 'WHL-LP';
+    string public name;
+    string public symbol;
     uint8 public constant decimals = 18;
-    uint  public totalSupply;
+    uint public totalSupply;
     mapping(address => uint) public balanceOf;
     mapping(address => mapping(address => uint)) public allowance;
 

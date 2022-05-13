@@ -7,7 +7,7 @@ import './FlashMain.sol';
 contract FlashmintFactory {
     address public feeTo;
     address public feeSetter;
-    uint256 public fee = 0.001e18; // 0.1% fee
+    uint256 public fee = 0.0001e18; // 0.01% fee
 
     mapping(address => address) public getFmToken; // Holds base -> flash-mintable token mappings
     mapping(address => address) public getBaseToken; // Holds flash-mintable -> base token mappings
@@ -21,7 +21,7 @@ contract FlashmintFactory {
 
     function createFlashMintableToken(address baseToken) external returns (address fmToken) {
         require(getFmToken[baseToken] == address(0), 'Flashmint: TOKEN_EXISTS'); // No need to check other way around
-        require(getBaseToken[baseToken] == address(0), 'Flashmint: TOKEN_EXISTS'); // Can't create an fmt of another fmt
+        require(getBaseToken[baseToken] == address(0), 'Flashmint: NESTED_TOKENS'); // Can't create a fmt of another fmt
 
         // Create the token
         bytes memory bytecode = getCreationBytecode(baseToken);
