@@ -51,8 +51,8 @@ export const deployFlash = async (signer: SignerWithAddress): Promise<{
     }
 };
 
-export const deploySwapFactory = async (signer: SignerWithAddress, flashmintFactoryAddress: string): Promise<WhaleswapFactory> =>{
-  return await deployContract("WhaleswapFactory", [signer.address, flashmintFactoryAddress], signer) as WhaleswapFactory;
+export const deploySwapFactory = async (signer: SignerWithAddress): Promise<WhaleswapFactory> =>{
+  return await deployContract("WhaleswapFactory", [signer.address], signer) as WhaleswapFactory;
 }
 
 export const deployContract = async (

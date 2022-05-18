@@ -152,12 +152,12 @@ contract WhaleswapPair is WhaleswapERC20 {
                 uint rootKLast = Math.sqrt(_kLast);
                 if (rootK > rootKLast) {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
-                    uint denominator = rootK.mul(20).add(rootKLast.mul(5));
+                    uint denominator;
 
                     // Dynamic fees for stable pairs
                     if(stable) {
                         numerator = numerator.mul(1);
-                        denominator = rootK.mul(4).add(rootKLast.mul(1));
+                        denominator = rootK.mul(3).add(rootKLast.mul(1));
                     }
                     else {
                         numerator = numerator.mul(5);
@@ -223,16 +223,16 @@ contract WhaleswapPair is WhaleswapERC20 {
 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
     function getAmountOut(uint amountIn, address tokenIn) external view returns (uint) {
-        require(amountIn > 0, 'WhaleswapLibrary: INSUFFICIENT_INPUT_AMOUNT');
+        require(amountIn > 0, 'Whaleswap: INSUFFICIENT_INPUT_AMOUNT');
         require(tokenIn == token0 || tokenIn == token1);
         (uint112 _reserve0, uint112 _reserve1) = (reserve0, reserve1);
 
         // Remove fee from amount received
         if(stable) {
-            amountIn -= amountIn / 40000;
+            amountIn = amountIn.mul(9996).div(10000);
         }
         else {
-            amountIn -= amountIn / 250000; //TODO: Check this is the right number of decimals
+            amountIn = amountIn.mul(9975);
         }
         return _getAmountOut(amountIn, tokenIn, _reserve0, _reserve1);
     }
@@ -248,7 +248,7 @@ contract WhaleswapPair is WhaleswapERC20 {
             return y * (tokenIn == token0 ? decimals1 : decimals0) / 1e18;
         } else {
             (uint reserveA, uint reserveB) = tokenIn == token0 ? (_reserve0, _reserve1) : (_reserve1, _reserve0);
-            return amountIn * reserveB / (reserveA + amountIn);
+            return amountIn * reserveB / (reserveA.mul(10000).add(amountIn));
         }
     }
 
@@ -273,19 +273,18 @@ contract WhaleswapPair is WhaleswapERC20 {
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'Whaleswap: INSUFFICIENT_INPUT_AMOUNT');
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-            uint balance0Adjusted = balance0.mul(10000);
-            uint balance1Adjusted = balance1.mul(10000); 
+            uint balance0Adjusted;
+            uint balance1Adjusted;
 
             // Dynamic fees 🐳
             if(stable){
-                balance0Adjusted = balance0Adjusted.sub(amount0In.mul(25)); // 25 == 0.25% fee
-                balance1Adjusted = balance1Adjusted.sub(amount1In.mul(25));
+                balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(4)); // 4 == 0.04% fee
+                balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(4));
             }
             else{
-                balance0Adjusted = balance0Adjusted.sub(amount0In.mul(4)); // 4 == 0.04% fee
-                balance1Adjusted = balance1Adjusted.sub(amount1In.mul(4));
+                balance0Adjusted = balance0.mul(10000).sub(amount0In.mul(25)); // 25 == 0.25% fee
+                balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(25));
             }
-            require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(10000**2), 'Whaleswap: K');
 
             // The curve, either x3y+y3x for stable pools, or x*y for volatile pools
             require(_k(balance0Adjusted, balance1Adjusted) >= _k(_reserve0, _reserve1).mul(10000**2), 'Whaleswap: K');

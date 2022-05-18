@@ -262,6 +262,27 @@ contract WhaleswapRouter {
         _swap(amounts, routes, to);
     }
 
+    function swapExactTokensForTokensSimple(
+        uint amountIn,
+        uint amountOutMin,
+        address tokenFrom,
+        address tokenTo,
+        bool stable,
+        address to,
+        uint deadline
+    ) external ensure(deadline) returns (uint[] memory amounts) {
+        route[] memory routes = new route[](1);
+        routes[0].from = tokenFrom;
+        routes[0].to = tokenTo;
+        routes[0].stable = stable;
+        amounts = getAmountsOut(amountIn, routes);
+        require(amounts[amounts.length - 1] >= amountOutMin, 'WhaleswapRouter: INSUFFICIENT_OUTPUT_AMOUNT');
+        TransferHelper.safeTransferFrom(
+            routes[0].from, msg.sender, pairFor(routes[0].from, routes[0].to, routes[0].stable), amounts[0]
+        );
+        _swap(amounts, routes, to);
+    }
+
     function swapExactETHForTokens(uint amountOutMin, route[] calldata routes, address to, uint deadline)
         external
         virtual
@@ -409,7 +430,7 @@ contract WhaleswapRouter {
     }
 
     // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
-    function quote(uint amountA, uint reserveA, uint reserveB) internal pure returns (uint amountB) {
+    function quote(uint amountA, uint reserveA, uint reserveB) public pure returns (uint amountB) {
         require(amountA > 0, 'WhaleswapRouter: INSUFFICIENT_AMOUNT');
         require(reserveA > 0 && reserveB > 0, 'WhaleswapRouter: INSUFFICIENT_LIQUIDITY');
         amountB = amountA.mul(reserveB) / reserveA;
