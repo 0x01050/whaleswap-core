@@ -36,35 +36,40 @@ const contracts: any = {
         [97]: { // BSC Testnet
             weth: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
             rpc: "https://data-seed-prebsc-1-s1.binance.org:8545",
-            factory: "0x5E9Bc5875C1e3086E1C08Ebb9f9991c666474495",
-            router: "0xca38537f132B841d0acdf343bcb2207A248A8ad9",
+            fmFactory: "0xc0BA80C32aCF50c43BABed238Aa3EBB1085b2187",
+            swapFactory: "0x0796DF217cd7E89efF775e85315417CE7d3fd5A5",
+            router: "0x6a1769D4Fdba5E5f1A1aDd7C242a416FF0c61cc3",
             multicall: "0xe42229bA0A91c491B22A9D20D61243741a20e6E9",
         },
         [4002]: { // Fantom Testnet
             weth: "0x07B9c47452C41e8E00f98aC4c075F5c443281d2A",
             rpc: "https://rpc.testnet.fantom.network",
-            factory: "0x5E9Bc5875C1e3086E1C08Ebb9f9991c666474495",
-            router: "0xca38537f132B841d0acdf343bcb2207A248A8ad9",
+            fmFactory: "0xc0BA80C32aCF50c43BABed238Aa3EBB1085b2187",
+            swapFactory: "0x0796DF217cd7E89efF775e85315417CE7d3fd5A5",
+            router: "0x6a1769D4Fdba5E5f1A1aDd7C242a416FF0c61cc3",
             multicall: "0xe42229bA0A91c491B22A9D20D61243741a20e6E9",
         },
         [43113]: { // Avalanche Fuji
             weth: "0x1D308089a2D1Ced3f1Ce36B1FcaF815b07217be3",
             rpc: "https://api.avax-test.network/ext/bc/C/rpc",
-            factory: "0x5E9Bc5875C1e3086E1C08Ebb9f9991c666474495",
-            router: "0xca38537f132B841d0acdf343bcb2207A248A8ad9", //TODO: This needs updating
-            multicall: "0xe42229bA0A91c491B22A9D20D61243741a20e6E9", //TODO: This needs updating
+            fmFactory: "0xc0BA80C32aCF50c43BABed238Aa3EBB1085b2187",
+            swapFactory: "0x0796DF217cd7E89efF775e85315417CE7d3fd5A5",
+            router: "0x6a1769D4Fdba5E5f1A1aDd7C242a416FF0c61cc3",
+            multicall: "0xe42229bA0A91c491B22A9D20D61243741a20e6E9",
         },
         [1313161555]: { // Aurora Testnet
             weth: "0xc06fafa6d5fEAbD686b4aB0f3De759ac3b277cEb",
             rpc: "https://testnet.aurora.dev",
-            factory: "",
+            fmFactory: "",
+            swapFactory: "",
             router: "",
             multicall: "",
         },
         //[588]: { // Metis Testnet
         //    weth: "0x420000000000000000000000000000000000000A",
         //    rpc: "https://stardust.metis.io/?owner=588",
-        //    factory: "",
+        //    fmFactory: "",
+        //    swapFactory: "",
         //    router: "",
         //    multicall: "",
         //},
@@ -86,9 +91,9 @@ async function main() {
         // Deploy flash mint factory
         const mintFactoryFactory = new FlashmintFactory__factory(wallet);
         let flashmintFactory;
-        if (contracts[network][chainId].factory) {
+        if (contracts[network][chainId].fmFactory) {
             flashmintFactory = mintFactoryFactory.attach(
-                contracts[network][chainId].factory
+                contracts[network][chainId].fmFactory
             );
         } else {
             flashmintFactory = await mintFactoryFactory.deploy(
@@ -107,14 +112,13 @@ async function main() {
         // Deploy swap factory
         const factoryFactory = new WhaleswapFactory__factory(wallet);
         let factory;
-        if (contracts[network][chainId].factory) {
+        if (contracts[network][chainId].swapFactory) {
             factory = factoryFactory.attach(
-                contracts[network][chainId].factory
+                contracts[network][chainId].swapFactory
             );
         } else {
             factory = await factoryFactory.deploy(
-                deployerAddress,
-                flashmintFactory.address
+                deployerAddress
             );
             await factory.deployed();
 

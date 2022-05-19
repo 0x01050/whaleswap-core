@@ -23,7 +23,6 @@ describe('WhaleswapRouter', async () => {
   let router: WhaleswapRouter;
   let token0: TestToken;
   let token1: TestToken;
-  let pair: WhaleswapPair;
 
   beforeEach(async () => {
     [wallet, treasury] = await ethers.getSigners();
