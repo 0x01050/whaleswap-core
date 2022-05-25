@@ -1,16 +1,32 @@
 import { ethers, network as nw, run as HardhatRun } from "hardhat";
 import {
     WhaleswapFactory__factory,
-    WhaleswapInterfaceMulticall__factory,
     WhaleswapRouter__factory,
     WhaleswapRouter,
-    FlashmintFactory__factory
+    FlashmintFactory__factory,
+    Multicall2__factory
 } from "../types";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const contracts: any = {
     mainnet: {
+        [1]: { // Ethereum Mainnet
+            weth: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            rpc: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+        },
+        [10]: { // Optimism Mainnet
+            weth: "0x4200000000000000000000000000000000000006",
+            rpc: "https://mainnet.optimism.io",
+        },
+        [137]: { // Polygon Mainnet
+            weth: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
+            rpc: "https://polygon-rpc.com",
+        },
+        [42161]: { // Arbitrum Mainnet
+            weth: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+            rpc: "https://arb1.arbitrum.io/rpc",
+        },
         [56]: { // BSC Mainnet
             weth: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
             rpc: "https://bsc-dataseed.binance.org"
@@ -30,55 +46,100 @@ const contracts: any = {
         [1313161554]: { // Aurora
             weth: "0xC9BdeEd33CD01541e1eeD10f90519d2C06Fe3feB",
             rpc: "https://mainnet.aurora.dev"
-        }, 
+        },
+        [25]: { // Cronos
+            weth: "0x5C7F8A570d578ED84E63fdFA7b1eE72dEae1AE23",
+            rpc: "https://evm.cronos.org",
+        },
     },
     testnet: {
+        [3]: { // Ethereum Ropsten
+            weth: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+            rpc: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+        },
+        [69]: { // Optimism Kovan Testnet
+            weth: "0x4200000000000000000000000000000000000006",
+            rpc: "https://kovan.optimism.io",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+        },
+        [80001]: { // Polygon Mumbai Testnet
+            weth: "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
+            rpc: "https://matic-mumbai.chainstacklabs.com",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+        },
+        [421611]: { // Arbitrum Rinkeby Testnet
+            weth: "0xEBbc3452Cc911591e4F18f3b36727Df45d6bd1f9",
+            rpc: "https://rinkeby.arbitrum.io/rpc",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+        },
         [97]: { // BSC Testnet
             weth: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
             rpc: "https://data-seed-prebsc-1-s1.binance.org:8545",
-            fmFactory: "0xc0BA80C32aCF50c43BABed238Aa3EBB1085b2187",
-            swapFactory: "0x0796DF217cd7E89efF775e85315417CE7d3fd5A5",
-            router: "0x6a1769D4Fdba5E5f1A1aDd7C242a416FF0c61cc3",
-            multicall: "0xe42229bA0A91c491B22A9D20D61243741a20e6E9",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
         [4002]: { // Fantom Testnet
             weth: "0x07B9c47452C41e8E00f98aC4c075F5c443281d2A",
             rpc: "https://rpc.testnet.fantom.network",
-            fmFactory: "0xc0BA80C32aCF50c43BABed238Aa3EBB1085b2187",
-            swapFactory: "0x0796DF217cd7E89efF775e85315417CE7d3fd5A5",
-            router: "0x6a1769D4Fdba5E5f1A1aDd7C242a416FF0c61cc3",
-            multicall: "0xe42229bA0A91c491B22A9D20D61243741a20e6E9",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
         [43113]: { // Avalanche Fuji
             weth: "0x1D308089a2D1Ced3f1Ce36B1FcaF815b07217be3",
             rpc: "https://api.avax-test.network/ext/bc/C/rpc",
-            fmFactory: "0xc0BA80C32aCF50c43BABed238Aa3EBB1085b2187",
-            swapFactory: "0x0796DF217cd7E89efF775e85315417CE7d3fd5A5",
-            router: "0x6a1769D4Fdba5E5f1A1aDd7C242a416FF0c61cc3",
-            multicall: "0xe42229bA0A91c491B22A9D20D61243741a20e6E9",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
-        [1313161555]: { // Aurora Testnet
+        /*[1313161555]: { // Aurora Testnet
             weth: "0xc06fafa6d5fEAbD686b4aB0f3De759ac3b277cEb",
             rpc: "https://testnet.aurora.dev",
             fmFactory: "",
             swapFactory: "",
             router: "",
             multicall: "",
+        },*/
+        [588]: { // Metis Testnet
+            weth: "0x420000000000000000000000000000000000000A",
+            rpc: "https://stardust.metis.io/?owner=588",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
-        //[588]: { // Metis Testnet
-        //    weth: "0x420000000000000000000000000000000000000A",
-        //    rpc: "https://stardust.metis.io/?owner=588",
-        //    fmFactory: "",
-        //    swapFactory: "",
-        //    router: "",
-        //    multicall: "",
-        //},
+        [338]: { // Cronos Testnet
+            weth: "0x923a5A0FaFb0174a0749E18Ceb0A8751898C76Cf",
+            rpc: "https://evm-t3.cronos.org",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+        },
     },
 };
 const network = "testnet";
 
 async function main() { 
     for(const chainId in contracts[network]){
+        console.log("Deploying chain:", chainId);
         const prov = new ethers.providers.StaticJsonRpcProvider(contracts[network][chainId].rpc);
         const privKey = process.env['Testnet_Deployer_PrivateKey'];
         if(!privKey){
@@ -87,7 +148,7 @@ async function main() {
         }
         const wallet = new ethers.Wallet(privKey, prov);
         const deployerAddress = await wallet.getAddress();
-
+        
         // Deploy flash mint factory
         const mintFactoryFactory = new FlashmintFactory__factory(wallet);
         let flashmintFactory;
@@ -156,7 +217,7 @@ async function main() {
 
         // Deploy multicall
         let multicall;
-        const multicallFactory = new WhaleswapInterfaceMulticall__factory(wallet);
+        const multicallFactory = new Multicall2__factory(wallet);
         if (contracts[network][chainId].multicall) {
             multicall = multicallFactory.attach(
                 contracts[network][chainId].multicall
