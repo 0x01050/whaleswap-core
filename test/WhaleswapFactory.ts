@@ -8,7 +8,7 @@ import WhaleswapPair from '../artifacts/contracts/WhaleswapPair.sol/WhaleswapPai
 import { ethers } from 'hardhat'
 import { attachToContract, deployContract, deploySwapFactory } from '../scripts/deployer'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { FlashmintFactory, TestToken } from '../types'
+import { TestToken } from '../types'
 
 chai.use(solidity)
 

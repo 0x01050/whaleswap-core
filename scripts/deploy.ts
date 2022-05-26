@@ -141,7 +141,7 @@ async function main() {
     for(const chainId in contracts[network]){
         console.log("Deploying chain:", chainId);
         const prov = new ethers.providers.StaticJsonRpcProvider(contracts[network][chainId].rpc);
-        const privKey = process.env['Testnet_Deployer_PrivateKey'];
+        const privKey = process.env['Deployer_PrivateKey'];
         if(!privKey){
             console.log("No private key provided!");
             return;
