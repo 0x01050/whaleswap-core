@@ -32,7 +32,7 @@ describe('WhaleswapRouter', async () => {
     token0 = await deployContract("TestToken", []) as TestToken;
     token1 = await deployContract("TestToken", []) as TestToken;
     await createPair([token0.address, token1.address], false) as WhaleswapPair;
-    
+
     let tx = await token0.approve(router.address, maxUint256);
     await tx.wait();
     tx = await token1.approve(router.address, maxUint256);
@@ -53,15 +53,15 @@ describe('WhaleswapRouter', async () => {
 
   it('addLiquidity', async () => {
     let tx = await router.addLiquidity(
-        token0.address,
-        token1.address,
-        false,
-        ethers.utils.parseEther("1"),
-        ethers.utils.parseEther("1"),
-        0,
-        0,
-        wallet.address,
-        maxUint256
+      token0.address,
+      token1.address,
+      false,
+      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("1"),
+      0,
+      0,
+      wallet.address,
+      maxUint256
     );
     await tx.wait();
   })
@@ -69,15 +69,15 @@ describe('WhaleswapRouter', async () => {
   it('doSwap', async () => {
     const pairAddress = await factory.getPair(token0.address, token1.address, false);
     let tx = await router.addLiquidity(
-        token0.address,
-        token1.address,
-        false,
-        ethers.utils.parseEther("1000000"),
-        ethers.utils.parseEther("1000000"),
-        0,
-        0,
-        wallet.address,
-        maxUint256
+      token0.address,
+      token1.address,
+      false,
+      ethers.utils.parseEther("1000000"),
+      ethers.utils.parseEther("1000000"),
+      0,
+      0,
+      wallet.address,
+      maxUint256
     );
     await tx.wait();
 
@@ -88,11 +88,11 @@ describe('WhaleswapRouter', async () => {
 
     const amountIn = ethers.utils.parseEther("1");
     tx = await router.swapExactTokensForTokens(
-        amountIn,
-        0,
-        [{from: token0.address, to: token1.address, stable: false}],
-        wallet.address,
-        maxUint256
+      amountIn,
+      0,
+      [{ from: token0.address, to: token1.address, stable: false }],
+      wallet.address,
+      maxUint256
     );
     await tx.wait();
 
@@ -111,16 +111,27 @@ describe('WhaleswapRouter', async () => {
     expect(Number(ethers.utils.formatEther(finalBalance1))).gt(Number(ethers.utils.formatEther(initialBalance1)));
   })
 
-  it('doStableSwap', async () => {
-    await createPair([token0.address, token1.address], true) as WhaleswapPair;
-    const pairAddress = await factory.getPair(token0.address, token1.address, true);
+  // This test is currently just to compare the pancake output with ours as a sanity check
+  /*it('doSwapPancake', async () => {
+    const pancakeFactory = await ethers.getContractAt("IPancakeFactory", "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73", wallet) as IPancakeFactory;
+    const pancakeRouter = await ethers.getContractAt("IPancakeRouter", "0x10ED43C718714eb63d5aA57B78B54704E256024E", wallet) as IPancakeRouter;
 
-    let tx = await router.addLiquidity(
+    let tx = await pancakeFactory.createPair(token0.address, token1.address);
+    await tx.wait();
+
+    const pairAddress = await pancakeFactory.getPair(token0.address, token1.address);
+    const pancakePair = await ethers.getContractAt("IPancakePair", pairAddress, wallet) as IPancakePair;
+
+    tx = await token0.approve(pancakeRouter.address, maxUint256);
+    await tx.wait();
+    tx = await token1.approve(pancakeRouter.address, maxUint256);
+    await tx.wait();
+
+    tx = await pancakeRouter.addLiquidity(
         token0.address,
         token1.address,
-        true,
-        ethers.utils.parseEther("1000000"),
-        ethers.utils.parseEther("1000000"),
+        ethers.utils.parseEther("10"),
+        ethers.utils.parseEther("10"),
         0,
         0,
         wallet.address,
@@ -133,16 +144,85 @@ describe('WhaleswapRouter', async () => {
     const initialLpBalance0 = await token0.balanceOf(pairAddress);
     const initialLpBalance1 = await token1.balanceOf(pairAddress);
 
-    const amountIn = ethers.utils.parseEther("1");
-    tx = await router.swapExactTokensForTokens(
+    console.log(ethers.utils.formatEther(await pancakePair.balanceOf(wallet.address)))
+    console.log(ethers.utils.formatEther(await token0.balanceOf(wallet.address)));
+    console.log(ethers.utils.formatEther(await token1.balanceOf(wallet.address)));
+
+    const amountIn = ethers.utils.parseEther("10");
+    tx = await pancakeRouter.swapExactTokensForTokens(
         amountIn,
         0,
-        [{from: token0.address, to: token1.address, stable: true}],
+        [token0.address, token1.address],
         wallet.address,
         maxUint256
     );
     await tx.wait();
-    
+    console.log("!!!!");
+    console.log(ethers.utils.formatEther(await token0.balanceOf(pairAddress)));
+    console.log(ethers.utils.formatEther(await token1.balanceOf(pairAddress)));
+    console.log(ethers.utils.formatEther(await token0.balanceOf(wallet.address)));
+    console.log(ethers.utils.formatEther(await token1.balanceOf(wallet.address)));
+
+    tx = await pancakeRouter.swapExactTokensForTokens(
+      amountIn,
+      0,
+      [token1.address, token0.address],
+      wallet.address,
+      maxUint256
+  );
+  await tx.wait();
+  console.log("!!!!");
+  console.log(ethers.utils.formatEther(await token0.balanceOf(pairAddress)));
+  console.log(ethers.utils.formatEther(await token1.balanceOf(pairAddress)));
+  console.log(ethers.utils.formatEther(await token0.balanceOf(wallet.address)));
+  console.log(ethers.utils.formatEther(await token1.balanceOf(wallet.address)));
+    const finalBalance0 = await token0.balanceOf(wallet.address);
+    const finalBalance1 = await token1.balanceOf(wallet.address);
+    const finalLpBalance0 = await token0.balanceOf(pairAddress);
+    const finalLpBalance1 = await token1.balanceOf(pairAddress);
+
+    expect(finalLpBalance0).equals(initialLpBalance0.add(amountIn));
+    expect(finalLpBalance1).lt(initialLpBalance1);
+
+    // Should have {amountIn} less than we started with
+    expect(finalBalance0).equals(initialBalance0.sub(amountIn));
+
+    // Should have slightly more than before
+    expect(Number(ethers.utils.formatEther(finalBalance1))).gt(Number(ethers.utils.formatEther(initialBalance1)));
+  })*/
+
+  it('doStableSwap', async () => {
+    await createPair([token0.address, token1.address], true) as WhaleswapPair;
+    const pairAddress = await factory.getPair(token0.address, token1.address, true);
+
+    let tx = await router.addLiquidity(
+      token0.address,
+      token1.address,
+      true,
+      ethers.utils.parseEther("1000000"),
+      ethers.utils.parseEther("1000000"),
+      0,
+      0,
+      wallet.address,
+      maxUint256
+    );
+    await tx.wait();
+
+    const initialBalance0 = await token0.balanceOf(wallet.address);
+    const initialBalance1 = await token1.balanceOf(wallet.address);
+    const initialLpBalance0 = await token0.balanceOf(pairAddress);
+    const initialLpBalance1 = await token1.balanceOf(pairAddress);
+
+    const amountIn = ethers.utils.parseEther("1");
+    tx = await router.swapExactTokensForTokens(
+      amountIn,
+      0,
+      [{ from: token0.address, to: token1.address, stable: true }],
+      wallet.address,
+      maxUint256
+    );
+    await tx.wait();
+
     const finalBalance0 = await token0.balanceOf(wallet.address);
     const finalBalance1 = await token1.balanceOf(wallet.address);
     const finalLpBalance0 = await token0.balanceOf(pairAddress);
@@ -161,15 +241,15 @@ describe('WhaleswapRouter', async () => {
   it('doSimpleSwap', async () => {
     const pairAddress = await factory.getPair(token0.address, token1.address, false);
     let tx = await router.addLiquidity(
-        token0.address,
-        token1.address,
-        false,
-        ethers.utils.parseEther("1000000"),
-        ethers.utils.parseEther("1000000"),
-        0,
-        0,
-        wallet.address,
-        maxUint256
+      token0.address,
+      token1.address,
+      false,
+      ethers.utils.parseEther("1000000"),
+      ethers.utils.parseEther("1000000"),
+      0,
+      0,
+      wallet.address,
+      maxUint256
     );
     await tx.wait();
 
@@ -180,13 +260,13 @@ describe('WhaleswapRouter', async () => {
 
     const amountIn = ethers.utils.parseEther("1");
     tx = await router.swapExactTokensForTokensSimple(
-        amountIn,
-        0,
-        token0.address, 
-        token1.address, 
-        false,
-        wallet.address,
-        maxUint256
+      amountIn,
+      0,
+      token0.address,
+      token1.address,
+      false,
+      wallet.address,
+      maxUint256
     );
     await tx.wait();
 
@@ -219,15 +299,25 @@ describe('WhaleswapRouter', async () => {
     )
   })
 
+  function relDiff(a: number, b: number) {
+    return 100 * Math.abs((a - b) / ((a + b) / 2));
+  }
+
   it('getAmountOut', async () => {
     let tx = await router.addLiquidity(
-      token0.address, token1.address, false,  ethers.utils.parseEther("10000"), ethers.utils.parseEther("10000"), 0, 0, wallet.address, maxUint256
+      token0.address, token1.address, false, ethers.utils.parseEther("10000"), ethers.utils.parseEther("10000"), 0, 0, wallet.address, maxUint256
     );
     await tx.wait();
 
-    const result = await router.getAmountOut(ethers.utils.parseEther("10000"), token0.address, token1.address);
-    //console.log(result[1]);
-    //console.log(ethers.utils.formatEther(result[0]));
+    /*let result = await router.getAmountOut(ethers.utils.parseEther("1000"), token0.address, token1.address);
+
+    console.log("[+] Depositing $10,000 in each pool...");
+    console.log("[+] Swapping $1,000...");
+    console.log("[+] Volatile Slippage: " + relDiff(1000, Number(ethers.utils.formatEther(result[0]))).toFixed(2) + "%");
+
+    result = await router.getAmountOut(ethers.utils.parseEther("10000"), token0.address, token1.address);
+    console.log("[+] Swapping $10,000...");
+    console.log("[+] Volatile Slippage: " + relDiff(10000, Number(ethers.utils.formatEther(result[0]))).toFixed(2) + "%");*/
     expect((await router.getAmountOut(ethers.utils.parseEther("2"), token0.address, token1.address))[0]).to.eq(BigNumber.from("1994602076885661310"));
     await expect(router.getAmountOut(BigNumber.from(0), token0.address, token1.address)).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_INPUT_AMOUNT'
@@ -243,13 +333,20 @@ describe('WhaleswapRouter', async () => {
   it('getAmountOutStable', async () => {
     await createPair([token0.address, token1.address], true) as WhaleswapPair;
     let tx = await router.addLiquidity(
-      token0.address, token1.address, true,  ethers.utils.parseEther("10000"), ethers.utils.parseEther("10000"), 0, 0, wallet.address, maxUint256
+      token0.address, token1.address, true, ethers.utils.parseEther("10000"), ethers.utils.parseEther("10000"), 0, 0, wallet.address, maxUint256
     );
     await tx.wait();
 
-    const result = await router.getAmountOut(ethers.utils.parseEther("10000"), token0.address, token1.address);
-    //console.log(result[1]);
-    //console.log(ethers.utils.formatEther(result[0]));
+    let result = await router.getAmountOut(ethers.utils.parseEther("1000"), token0.address, token1.address);
+
+    /*console.log("[+] Depositing $10,000 in each pool...");
+    console.log("[+] Swapping $1,000...");
+    console.log("[+] Stable Slippage: " + relDiff(1000, Number(ethers.utils.formatEther(result[0]))).toFixed(2) + "%");
+
+    result = await router.getAmountOut(ethers.utils.parseEther("10000"), token0.address, token1.address);
+    console.log("[+] Swapping $10,000...");
+    console.log("[+] Stable Slippage: " + relDiff(10000, Number(ethers.utils.formatEther(result[0]))).toFixed(2) + "%");*/
+
     expect((await router.getAmountOut(ethers.utils.parseEther("2"), token0.address, token1.address))[0]).to.eq(BigNumber.from("1999199999992012792"));
     await expect(router.getAmountOut(BigNumber.from(0), token0.address, token1.address)).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_INPUT_AMOUNT'
@@ -280,7 +377,7 @@ describe('WhaleswapRouter', async () => {
     await expect(router['getAmountsOut(uint256,address[])'](ethers.utils.parseEther("2"), [token0.address])).to.be.revertedWith(
       'WhaleswapRouter: INVALID_PATH'
     )
-    const path: WhaleswapRouter.RouteStruct[] = [{from: token0.address, to: token1.address, stable: false}]
+    const path: WhaleswapRouter.RouteStruct[] = [{ from: token0.address, to: token1.address, stable: false }]
     expect(await router['getAmountsOut(uint256,(address,address,bool)[])'](ethers.utils.parseEther("2"), path)).to.deep.eq([BigNumber.from("2000000000000000000"), BigNumber.from("1994602076885661310")])
   })
 

@@ -14,42 +14,82 @@ const contracts: any = {
         [1]: { // Ethereum Mainnet
             weth: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
             rpc: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [10]: { // Optimism Mainnet
             weth: "0x4200000000000000000000000000000000000006",
             rpc: "https://mainnet.optimism.io",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [137]: { // Polygon Mainnet
             weth: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
             rpc: "https://polygon-rpc.com",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [42161]: { // Arbitrum Mainnet
             weth: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
             rpc: "https://arb1.arbitrum.io/rpc",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [56]: { // BSC Mainnet
             weth: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-            rpc: "https://bsc-dataseed.binance.org"
+            rpc: "https://bsc-dataseed.binance.org",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [43114]: { // Avalanche
             weth: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
-            rpc: "https://api.avax.network/ext/bc/C/rpc"
+            rpc: "https://api.avax.network/ext/bc/C/rpc",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [250]: { // Fantom
             weth: "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
-            rpc: "https://rpc.ftm.tools"
+            rpc: "https://rpc.ftm.tools",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         }, 
         [1088]: { // Metis 
             weth: "0x420000000000000000000000000000000000000A",
-            rpc: "https://andromeda.metis.io/?owner=1088"
+            rpc: "https://andromeda.metis.io/?owner=1088",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [1313161554]: { // Aurora
             weth: "0xC9BdeEd33CD01541e1eeD10f90519d2C06Fe3feB",
-            rpc: "https://mainnet.aurora.dev"
+            rpc: "https://mainnet.aurora.dev",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
         [25]: { // Cronos
             weth: "0x5C7F8A570d578ED84E63fdFA7b1eE72dEae1AE23",
             rpc: "https://evm.cronos.org",
+            fmFactory: "",
+            swapFactory: "",
+            router: "",
+            multicall: "",
         },
     },
     testnet: {

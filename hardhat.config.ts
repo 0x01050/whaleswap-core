@@ -13,10 +13,10 @@ module.exports = {
       url: "http://127.0.0.1:8545"
     },
     hardhat: {
-      chainId: 97,
+      chainId: 56,
       forking: {
-        //url: "https://speedy-nodes-nyc.moralis.io/214f6439e2aaf21012c17787/bsc/mainnet/archive",
-        url: "https://speedy-nodes-nyc.moralis.io/214f6439e2aaf21012c17787/bsc/testnet/archive",
+        url: "https://speedy-nodes-nyc.moralis.io/214f6439e2aaf21012c17787/bsc/mainnet/archive",
+        //url: "https://speedy-nodes-nyc.moralis.io/214f6439e2aaf21012c17787/bsc/testnet/archive",
       },
       accounts: [
         { privateKey: process.env['Deployer_PrivateKey'], balance: '1000000000000000000' },

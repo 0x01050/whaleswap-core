@@ -462,7 +462,7 @@ contract WhaleswapRouter {
         for (uint i; i < path.length - 1; i++) {
             (amounts[i+1],) = getAmountOut(amounts[i], path[i], path[i+1]);
         }
-    } //TODO: 100% custom, test this extra
+    }
 
     // performs chained getAmountOut calculations on any number of pairs, uses routes with specific info on stable pool preference, etc
     function getAmountsOut(uint amountIn, route[] memory routes) public view returns (uint[] memory amounts) {
