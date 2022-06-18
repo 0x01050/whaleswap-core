@@ -132,20 +132,20 @@ module.exports = {
       bsc: process.env["BscScan_API_Key"],
       bscTestnet: process.env["BscScan_API_Key"],
       // fantom mainnet
-      opera: "YOUR_FTMSCAN_API_KEY",
-      ftmTestnet: "YOUR_FTMSCAN_API_KEY",
+      opera: process.env["FtmScan_API_Key"],
+      ftmTestnet: process.env["FtmScan_API_Key"],
       // optimism
-      optimisticEthereum: "YOUR_OPTIMISTIC_ETHERSCAN_API_KEY",
-      optimisticKovan: "YOUR_OPTIMISTIC_ETHERSCAN_API_KEY",
+      optimisticEthereum: process.env["OptimismEtherScan_API_Key"],
+      optimisticKovan: process.env["OptimismEtherScan_API_Key"],
       // polygon
-      polygon: "YOUR_POLYGONSCAN_API_KEY",
-      polygonMumbai: "YOUR_POLYGONSCAN_API_KEY",
+      polygon: process.env["PolyScan_API_Key"],
+      polygonMumbai: process.env["PolyScan_API_Key"],
       // arbitrum
-      arbitrumOne: "YOUR_ARBISCAN_API_KEY",
-      arbitrumTestnet: "YOUR_ARBISCAN_API_KEY",
+      arbitrumOne: process.env["ArbiScan_API_Key"],
+      arbitrumTestnet: process.env["ArbiScan_API_Key"],
       // avalanche
-      avalanche: "YOUR_SNOWTRACE_API_KEY",
-      avalancheFujiTestnet: "YOUR_SNOWTRACE_API_KEY",
+      avalanche: process.env["SnowTrace_API_Key"],
+      avalancheFujiTestnet: process.env["SnowTrace_API_Key"],
       // aurora
       aurora: "api-key",
       auroraTestnet: "api-key",

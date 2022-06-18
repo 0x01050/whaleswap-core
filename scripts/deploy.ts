@@ -21,34 +21,34 @@ const contracts: any = {
             swapFactory: "",
             router: "",
             multicall: "",
-        },
+        },*/
         [10]: { // Optimism Mainnet
             hardhatId: "optimisticEthereum",
             weth: "0x4200000000000000000000000000000000000006",
             rpc: "https://mainnet.optimism.io",
-            fmFactory: "",
-            swapFactory: "",
-            router: "",
-            multicall: "",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
         [137]: { // Polygon Mainnet
             hardhatId: "polygon",
             weth: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
             rpc: "https://polygon-rpc.com",
-            fmFactory: "",
-            swapFactory: "",
-            router: "",
-            multicall: "",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
         [42161]: { // Arbitrum Mainnet
             hardhatId: "arbitrumOne",
             weth: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
             rpc: "https://arb1.arbitrum.io/rpc",
-            fmFactory: "",
-            swapFactory: "",
-            router: "",
-            multicall: "",
-        },*/
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+        },
         [56]: { // BSC Mainnet
             hardhatId: "bsc",
             weth: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
@@ -58,25 +58,25 @@ const contracts: any = {
             router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
             multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
-        /*[43114]: { // Avalanche
+        [43114]: { // Avalanche
             hardhatId: "avalanche",
             weth: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
             rpc: "https://api.avax.network/ext/bc/C/rpc",
-            fmFactory: "",
-            swapFactory: "",
-            router: "",
-            multicall: "",
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
         },
         [250]: { // Fantom
             hardhatId: "opera",
             weth: "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
             rpc: "https://rpc.ftm.tools",
-            fmFactory: "",
-            swapFactory: "",
-            router: "",
-            multicall: "",
-        }, 
-        [1088]: { // Metis
+            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
+            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
+            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
+            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+        },
+        /*[1088]: { // Metis
             hardhatId: "metis",
             weth: "0x420000000000000000000000000000000000000A",
             rpc: "https://andromeda.metis.io/?owner=1088",
@@ -204,6 +204,7 @@ async function main() {
         console.log(`Deploying chain: ${contracts[network][chainId].hardhatId} (${chainId})`);
         //hre.changeNetwork(contracts[network][chainId].hardhatId);
         const prov = new ethers.providers.StaticJsonRpcProvider(contracts[network][chainId].rpc);
+
         const privKey = process.env['Deployer_PrivateKey'];
         if(!privKey){
             console.log("No private key provided!");
@@ -244,13 +245,13 @@ async function main() {
             );
             await factory.deployed();
 
+            await factory.setFeeTo(wallet.address);
+            console.log("Set feeTo");
+            
             await VerifyContract(factory.address, [
                 deployerAddress
             ]);
         }
-        await VerifyContract(factory.address, [
-            deployerAddress
-        ]);
         console.log(`${contracts[network][chainId].hardhatId}: ✅ Swap Factory: ${factory.address}`);
 
         // Deploy router
@@ -272,10 +273,6 @@ async function main() {
                 contracts[network][chainId].weth
             ]);
         }
-        await VerifyContract(router.address, [
-            factory.address,
-            contracts[network][chainId].weth
-        ]);
         console.log(`${contracts[network][chainId].hardhatId}: ✅ Router: ${router.address}`);
 
         // Deploy multicall
@@ -291,7 +288,6 @@ async function main() {
 
             await VerifyContract(multicall.address, []);
         }
-        await VerifyContract(multicall.address, []);
         console.log(`${contracts[network][chainId].hardhatId}: ✅ Multicall: ${multicall.address}`);
     }
 }
