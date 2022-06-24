@@ -327,7 +327,7 @@ contract WhaleswapRouter {
             (uint reserve0, uint reserve1,) = pair.getReserves();
             (uint reserveInput,) = routes[i].from == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
             uint amountInput = IERC20(routes[i].from).balanceOf(address(pair)).sub(reserveInput);
-            (amountOutput,) = getAmountOut(amountInput, token0, token1);
+            amountOutput = getAmountOut(amountInput, token0, token1, routes[i].stable);
             }
             (uint amount0Out, uint amount1Out) = routes[i].from == token0 ? (uint(0), amountOutput) : (amountOutput, uint(0));
             address to = i < routes.length - 1 ? pairFor(routes[i+1].from, routes[i+1].to, routes[i+1].stable) : _to;
@@ -452,6 +452,14 @@ contract WhaleswapRouter {
             amountVolatile = WhaleswapPair(pair).getAmountOut(amountIn, tokenIn);
         }
         return amountStable > amountVolatile ? (amountStable, true) : (amountVolatile, false);
+    }
+
+    // given an input amount of an asset, pair reserves and the pool type, returns the maximum output amount of the other asset
+    function getAmountOut(uint amountIn, address tokenIn, address tokenOut, bool isStable) public view returns (uint amountOut) {
+        require(amountIn > 0, 'WhaleswapRouter: INSUFFICIENT_INPUT_AMOUNT');
+        require(tokenIn != address(0) && tokenOut != address(0), 'WhaleswapRouter: INSUFFICIENT_LIQUIDITY');
+
+        return WhaleswapPair(pairFor(tokenIn, tokenOut, isStable)).getAmountOut(amountIn, tokenIn);
     }
 
     // performs chained getAmountOut calculations on any number of pairs, automatically chooses the most liquid route

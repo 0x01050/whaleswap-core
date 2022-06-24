@@ -156,8 +156,8 @@ contract WhaleswapPair is WhaleswapERC20 {
 
                     // Dynamic fees for stable pairs
                     if(stable) {
-                        numerator = numerator.mul(1);
-                        denominator = rootK.mul(3).add(rootKLast.mul(1));
+                        numerator = numerator;
+                        denominator = rootK.mul(3).add(rootKLast);
                     }
                     else {
                         numerator = numerator.mul(5);
