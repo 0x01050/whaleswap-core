@@ -318,14 +318,14 @@ describe('WhaleswapRouter', async () => {
     result = await router.getAmountOut(ethers.utils.parseEther("10000"), token0.address, token1.address);
     console.log("[+] Swapping $10,000...");
     console.log("[+] Volatile Slippage: " + relDiff(10000, Number(ethers.utils.formatEther(result[0]))).toFixed(2) + "%");*/
-    expect((await router.getAmountOut(ethers.utils.parseEther("2"), token0.address, token1.address))[0]).to.eq(BigNumber.from("1994602076885661310"));
-    await expect(router.getAmountOut(BigNumber.from(0), token0.address, token1.address)).to.be.revertedWith(
+    expect((await router["getAmountOut(uint256,address,address)"](ethers.utils.parseEther("2"), token0.address, token1.address))[0]).to.eq(BigNumber.from("1994602076885661310"));
+    await expect(router["getAmountOut(uint256,address,address)"](BigNumber.from(0), token0.address, token1.address)).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_INPUT_AMOUNT'
     )
-    await expect(router.getAmountOut(ethers.utils.parseEther("2"), '0x0000000000000000000000000000000000000000', token1.address)).to.be.revertedWith(
+    await expect(router["getAmountOut(uint256,address,address)"](ethers.utils.parseEther("2"), '0x0000000000000000000000000000000000000000', token1.address)).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_LIQUIDITY'
     )
-    await expect(router.getAmountOut(ethers.utils.parseEther("2"), token0.address, '0x0000000000000000000000000000000000000000')).to.be.revertedWith(
+    await expect(router["getAmountOut(uint256,address,address)"](ethers.utils.parseEther("2"), token0.address, '0x0000000000000000000000000000000000000000')).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_LIQUIDITY'
     )
   })
@@ -337,7 +337,7 @@ describe('WhaleswapRouter', async () => {
     );
     await tx.wait();
 
-    let result = await router.getAmountOut(ethers.utils.parseEther("1000"), token0.address, token1.address);
+    let result = await router["getAmountOut(uint256,address,address)"](ethers.utils.parseEther("1000"), token0.address, token1.address);
 
     /*console.log("[+] Depositing $10,000 in each pool...");
     console.log("[+] Swapping $1,000...");
@@ -347,14 +347,14 @@ describe('WhaleswapRouter', async () => {
     console.log("[+] Swapping $10,000...");
     console.log("[+] Stable Slippage: " + relDiff(10000, Number(ethers.utils.formatEther(result[0]))).toFixed(2) + "%");*/
 
-    expect((await router.getAmountOut(ethers.utils.parseEther("2"), token0.address, token1.address))[0]).to.eq(BigNumber.from("1999199999992012792"));
-    await expect(router.getAmountOut(BigNumber.from(0), token0.address, token1.address)).to.be.revertedWith(
+    expect((await router["getAmountOut(uint256,address,address)"](ethers.utils.parseEther("2"), token0.address, token1.address))[0]).to.eq(BigNumber.from("1999199999992012792"));
+    await expect(router["getAmountOut(uint256,address,address)"](BigNumber.from(0), token0.address, token1.address)).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_INPUT_AMOUNT'
     )
-    await expect(router.getAmountOut(ethers.utils.parseEther("2"), '0x0000000000000000000000000000000000000000', token1.address)).to.be.revertedWith(
+    await expect(router["getAmountOut(uint256,address,address)"](ethers.utils.parseEther("2"), '0x0000000000000000000000000000000000000000', token1.address)).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_LIQUIDITY'
     )
-    await expect(router.getAmountOut(ethers.utils.parseEther("2"), token0.address, '0x0000000000000000000000000000000000000000')).to.be.revertedWith(
+    await expect(router["getAmountOut(uint256,address,address)"](ethers.utils.parseEther("2"), token0.address, '0x0000000000000000000000000000000000000000')).to.be.revertedWith(
       'WhaleswapRouter: INSUFFICIENT_LIQUIDITY'
     )
   })

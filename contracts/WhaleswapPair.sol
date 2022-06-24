@@ -287,7 +287,7 @@ contract WhaleswapPair is WhaleswapERC20 {
             }
 
             // The curve, either x3y+y3x for stable pools, or x*y for volatile pools
-            require(_k(balance0Adjusted, balance1Adjusted) >= _k(_reserve0, _reserve1).mul(10000**2), 'Whaleswap: K');
+            require(_k(balance0Adjusted, balance1Adjusted) >= _k(_reserve0 * 10000, _reserve1 * 10000), 'Whaleswap: K');
         }
 
         _update(balance0, balance1, _reserve0, _reserve1);
