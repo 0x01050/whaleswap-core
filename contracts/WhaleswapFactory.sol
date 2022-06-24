@@ -16,6 +16,8 @@ contract WhaleswapFactory {
     bool internal _temp;
 
     event PairCreated(address indexed token0, address indexed token1, bool stable, address pair, uint);
+    event FeeToUpdated(address newFeeTo);
+    event FeeToSetterUpdated(address newFeeToSett);
 
     constructor(address _feeToSetter) {
         feeToSetter = _feeToSetter;
@@ -50,11 +52,13 @@ contract WhaleswapFactory {
     function setFeeTo(address _feeTo) external {
         require(msg.sender == feeToSetter, 'Whaleswap: FORBIDDEN');
         feeTo = _feeTo;
+        emit FeeToUpdated(_feeTo);
     }
 
     function setFeeToSetter(address _feeToSetter) external {
         require(msg.sender == feeToSetter, 'Whaleswap: FORBIDDEN');
         feeToSetter = _feeToSetter;
+        emit FeeToSetterUpdated(_feeToSetter);
     }
 
     function pairCodeHash() external pure returns (bytes32) {

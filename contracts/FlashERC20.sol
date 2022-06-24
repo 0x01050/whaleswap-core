@@ -16,19 +16,17 @@ import "./libraries/ERC20.sol";
 import "./libraries/SafeERC20.sol";
 import "./libraries/ReentrancyGuard.sol";
 import "./libraries/SafeMath.sol";
-import "./libraries/Ownable.sol";
 import "./interfaces/IBorrower.sol";
 import "./FlashmintFactory.sol";
 
 // @title FlashERC20
 // @notice A simple ERC20 wrapper with flash-mint functionality.
-contract FlashERC20 is ERC20, Ownable, ReentrancyGuard {
+contract FlashERC20 is ERC20, ReentrancyGuard {
     using SafeERC20 for ERC20;
     using SafeMath for uint256;
 
     // internal vars
     uint256 public _depositLimit = 500e22;
-    mapping(address => bool) public whitelistAddr;
 
     // constants
     uint256 private constant oneEth = 1e18;
@@ -42,7 +40,6 @@ contract FlashERC20 is ERC20, Ownable, ReentrancyGuard {
     event Withdrawal(address indexed src, uint256 wad);
     event FlashMint(address indexed src, uint256 wad);
     event NewDepositLimit(uint256 dpl);
-    event WhitelistUpdate(address addr, bool status);
     
     constructor(ERC20 _underlying)
         ERC20(
@@ -55,12 +52,8 @@ contract FlashERC20 is ERC20, Ownable, ReentrancyGuard {
         _setupDecimals(_underlying.decimals());
     }
 
-    function setWhitelist(address addr, bool status) external onlyOwner {
-        whitelistAddr[addr] = status;
-        emit WhitelistUpdate(addr, status);
-    }
-
-    function setDepositLimit(uint256 value) public onlyOwner {
+    function setDepositLimit(uint256 value) public {
+        require(msg.sender == factory.feeSetter(), "Only flashmint factory fee setter can update deposit limit");
         _depositLimit = value;
         emit NewDepositLimit(_depositLimit);
     }

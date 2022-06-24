@@ -14,6 +14,9 @@ contract FlashmintFactory {
     address[] public allTokens;
 
     event TokenCreated(address indexed baseToken, address fmToken, uint);
+    event FeeUpdated(uint newFee);
+    event FeeToUpdated(address newFeeTo);
+    event FeeSetterUpdated(address newFeeSetter);
 
     constructor(address _feeSetter) {
         feeSetter = _feeSetter;
@@ -44,16 +47,19 @@ contract FlashmintFactory {
     function setFee(uint256 _fee) external {
         require(msg.sender == feeSetter, 'Flashmint: FORBIDDEN');
         fee = _fee;
+        emit FeeUpdated(_fee);
     }
 
     function setFeeTo(address _feeTo) external {
         require(msg.sender == feeSetter, 'Flashmint: FORBIDDEN');
         feeTo = _feeTo;
+        emit FeeToUpdated(_feeTo);
     }
 
     function setFeeSetter(address _feeSetter) external {
         require(msg.sender == feeSetter, 'Flashmint: FORBIDDEN');
         feeSetter = _feeSetter;
+        emit FeeSetterUpdated(_feeSetter);
     }
 
     function getCreationBytecode(address _baseToken) public pure returns (bytes memory) {
