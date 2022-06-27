@@ -94,6 +94,11 @@ contract FlashMain is ERC20, ReentrancyGuard {
         // double-check that all fWBNB is backed by BNB
         assert(address(this).balance >= totalSupply());
 
+        // send the fee
+        if (fee != 0) {
+            payable(FlashmintFactory(factory).feeTo()).transfer(_borrowerDebt);
+        }
+
         // check that fee has been paid
         require(_borrowerDebt == 0, "Fee not paid");
 

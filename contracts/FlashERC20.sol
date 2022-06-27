@@ -95,7 +95,7 @@ contract FlashERC20 is ERC20, ReentrancyGuard {
 
         // send the fee
         if (fee != 0) {
-            underlying.safeTransferFrom(msg.sender, address(this), actualFee);
+            underlying.safeTransferFrom(msg.sender, FlashmintFactory(factory).feeTo(), actualFee);
         }
 
         emit FlashMint(msg.sender, amount);
