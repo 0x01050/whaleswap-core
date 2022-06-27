@@ -65,7 +65,7 @@ contract FlashmintFactory {
     function getCreationBytecode(address _baseToken) public pure returns (bytes memory) {
         if(_baseToken == address(0)) {
             bytes memory bytecode = type(FlashMain).creationCode;
-            return abi.encodePacked(bytecode, abi.encode(_baseToken));
+            return abi.encodePacked(bytecode);
         }
         else {
             bytes memory bytecode = type(FlashERC20).creationCode;
