@@ -3,6 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-etherscan";
 import "@typechain/hardhat";
 import "hardhat-abi-exporter";
+import "hardhat-change-network";
 import * as dotenv from "dotenv";
 dotenv.config();
 

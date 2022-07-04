@@ -1,9 +1,9 @@
-import { changeNetwork, ethers, network as nw, run as HardhatRun } from "hardhat";
+import "hardhat-change-network";
+import { ethers, run as HardhatRun } from "hardhat";
 import {
     WhaleswapFactory__factory,
     WhaleswapRouter__factory,
     WhaleswapRouter,
-    FlashmintFactory__factory,
     Multicall2__factory
 } from "../types";
 import * as dotenv from "dotenv";
@@ -26,55 +26,55 @@ const contracts: any = {
             hardhatId: "optimisticEthereum",
             weth: "0x4200000000000000000000000000000000000006",
             rpc: "https://mainnet.optimism.io",
-            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
-            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
-            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
-            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+            fmFactory: "",
+            swapFactory: "0xABc26F8364cc0dD728Ac5c23fa40886fDa3dD121",
+            router: "0x66262362225eE5Ce109D6E59b3F3b2a8dbe37318",
+            multicall: "0x4091d8938b7b5299ED7e55650294980AA699092F",
         },
         [137]: { // Polygon Mainnet
             hardhatId: "polygon",
             weth: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
             rpc: "https://polygon-rpc.com",
-            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
-            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
-            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
-            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+            fmFactory: "",
+            swapFactory: "0xABc26F8364cc0dD728Ac5c23fa40886fDa3dD121",
+            router: "0x66262362225eE5Ce109D6E59b3F3b2a8dbe37318",
+            multicall: "0x4091d8938b7b5299ED7e55650294980AA699092F",
         },
         [42161]: { // Arbitrum Mainnet
             hardhatId: "arbitrumOne",
             weth: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
             rpc: "https://arb1.arbitrum.io/rpc",
-            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
-            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
-            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
-            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+            fmFactory: "",
+            swapFactory: "0xABc26F8364cc0dD728Ac5c23fa40886fDa3dD121",
+            router: "0x66262362225eE5Ce109D6E59b3F3b2a8dbe37318",
+            multicall: "0x4091d8938b7b5299ED7e55650294980AA699092F",
         },
         [56]: { // BSC Mainnet
             hardhatId: "bsc",
             weth: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
             rpc: "https://bsc-dataseed.binance.org",
-            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
-            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
-            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
-            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+            fmFactory: "",
+            swapFactory: "0xABc26F8364cc0dD728Ac5c23fa40886fDa3dD121",
+            router: "0x66262362225eE5Ce109D6E59b3F3b2a8dbe37318",
+            multicall: "0x4091d8938b7b5299ED7e55650294980AA699092F",
         },
         [43114]: { // Avalanche
             hardhatId: "avalanche",
             weth: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
             rpc: "https://api.avax.network/ext/bc/C/rpc",
-            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
-            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
-            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
-            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+            fmFactory: "",
+            swapFactory: "0xABc26F8364cc0dD728Ac5c23fa40886fDa3dD121",
+            router: "0x66262362225eE5Ce109D6E59b3F3b2a8dbe37318",
+            multicall: "0x4091d8938b7b5299ED7e55650294980AA699092F",
         },
         [250]: { // Fantom
             hardhatId: "opera",
             weth: "0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83",
             rpc: "https://rpc.ftm.tools",
-            fmFactory: "0xc24839dD20855c5CCEA5293032B57CeaC0eca9F3",
-            swapFactory: "0xD18E754824641182823D5534fAC974B6F98eb962",
-            router: "0x7e17e886488df4A1a44D23c67dB212e48428d56C",
-            multicall: "0xCE19e2b65F193291Dd41A047ED468faC0895e12c",
+            fmFactory: "",
+            swapFactory: "0xABc26F8364cc0dD728Ac5c23fa40886fDa3dD121",
+            router: "0x66262362225eE5Ce109D6E59b3F3b2a8dbe37318",
+            multicall: "0x4091d8938b7b5299ED7e55650294980AA699092F",
         },
         /*[1088]: { // Metis
             hardhatId: "metis",
@@ -202,7 +202,7 @@ const network = "mainnet";
 async function main() { 
     for(const chainId in contracts[network]){
         console.log(`Deploying chain: ${contracts[network][chainId].hardhatId} (${chainId})`);
-        //hre.changeNetwork(contracts[network][chainId].hardhatId);
+        hre.changeNetwork(contracts[network][chainId].hardhatId);
         const prov = new ethers.providers.StaticJsonRpcProvider(contracts[network][chainId].rpc);
 
         const privKey = process.env['Deployer_PrivateKey'];
@@ -212,9 +212,9 @@ async function main() {
         }
         const wallet = new ethers.Wallet(privKey, prov);
         const deployerAddress = await wallet.getAddress();
-        
+
         // Deploy flash mint factory
-        const mintFactoryFactory = new FlashmintFactory__factory(wallet);
+        /*const mintFactoryFactory = new FlashmintFactory__factory(wallet);
         let flashmintFactory;
         if (contracts[network][chainId].fmFactory) {
             flashmintFactory = mintFactoryFactory.attach(
@@ -226,11 +226,12 @@ async function main() {
             );
             await flashmintFactory.deployed();
 
-            await VerifyContract(flashmintFactory.address, [
-                deployerAddress
-            ]);
+            await VerifyContract(
+                flashmintFactory.address, 
+                [deployerAddress]
+            );
         }
-        console.log(`${contracts[network][chainId].hardhatId}: ✅ Flashmint Factory: ${flashmintFactory.address}`);
+        console.log(`${contracts[network][chainId].hardhatId}: ✅ Flashmint Factory: ${flashmintFactory.address}`);*/
 
         // Deploy swap factory
         const factoryFactory = new WhaleswapFactory__factory(wallet);
@@ -248,9 +249,10 @@ async function main() {
             await factory.setFeeTo(wallet.address);
             console.log("Set feeTo");
             
-            await VerifyContract(factory.address, [
-                deployerAddress
-            ]);
+            await VerifyContract(
+                factory.address, 
+                [deployerAddress]
+            );
         }
         console.log(`${contracts[network][chainId].hardhatId}: ✅ Swap Factory: ${factory.address}`);
 
@@ -268,10 +270,10 @@ async function main() {
             );
             await router.deployed();
             
-            await VerifyContract(router.address, [
-                factory.address,
-                contracts[network][chainId].weth
-            ]);
+            await VerifyContract(
+                router.address, 
+                [factory.address, contracts[network][chainId].weth]
+            );
         }
         console.log(`${contracts[network][chainId].hardhatId}: ✅ Router: ${router.address}`);
 
@@ -299,7 +301,7 @@ export async function VerifyContract(
     try {
         await HardhatRun("verify:verify", {
             address: contractAddress,
-            constructorArguments: parameters,
+            constructorArguments: parameters
         });
     } catch (e: any) {
         if (e.message.endsWith("Reason: Already Verified")) {
